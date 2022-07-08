@@ -1,0 +1,12 @@
+msgid "name"
+msgstr "hossein"
+
+msgid "client"
+msgstr "ali"
+
+msgid "status"
+msgstr "active"
+
+
+msgid "what`s your name?"
+msgstr "amin"
