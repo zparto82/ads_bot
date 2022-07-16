@@ -1,12 +1,21 @@
-msgid "name"
-msgstr "hossein"
+msgid 'connect'
+msgstr 'اتصال گروه / کانال'
 
-msgid "client"
-msgstr "ali"
+msgid "create"
+msgstr "ایجاد تبلیغ جدید"
 
-msgid "status"
-msgstr "active"
+msgid "show"
+msgstr "نمایش تبلیغات"
+
+msgid "settings"
+msgstr "مدیریت و تنظیمات"
+
+msgid "buy coins"
+msgstr "خرید سکه"
+
+msgid 'help'
+msgstr 'راهنما'
 
 
-msgid "what`s your name?"
-msgstr "amin"
+msgid "Introduction"
+msgstr "این ربات چه میکند:این ربات برای تبلیغات است شما میتوانید با کمترین هزینه برای اشتغال خود تبلیغ کنید و کسب و کار خود را گسترش دهید"

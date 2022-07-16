@@ -1,4 +1,5 @@
 import config
+import msg
 from telethon.sync import TelegramClient,events
 from telethon.tl.types import PeerUser
 from telethon import Button
@@ -12,28 +13,30 @@ bot.start(bot_token=bot_token)
 
 @bot.on(events.NewMessage(pattern="/start"))
 async def start(event):
-    z = event.message.peer_id
-    print(event.message.message)
+    z = event.message.peer_id.user_id
+    print(z)
+    print(event.message)
     keyboard = [
         [
-            Button.inline("اتصال گروه / کانال",b'1'),
-            Button.inline("ایجاد تبلیغ جدید", "2"),
+            Button.inline(str(msg.read_msg('connect')),b'1'),
+            Button.inline(str(msg.read_msg("create")), "2"),
         ],
         [
-            Button.inline("نمایش تبلیغات", "3"),
-            Button.inline("مدیریت و تنظیمات", "4")
+            Button.inline(msg.read_msg("show"), "3"),
+            Button.inline(msg.read_msg("settings"), "4")
         ],
         [
-            Button.inline("خرید سکه", "5"),
-            Button.inline("راهنما", "6")
+            Button.inline(msg.read_msg("buy coins"), "5"),
+            Button.inline(msg.read_msg("help"), "6")
         ]
     ]
 
-    await bot.send_message(z,"این ربات چه میکند:این ربات برای تبلیغات است شما میتوانید با کمترین هزینه برای اشتغال خود تبلیغ کنید و کسب و کار خود را گسترش دهید" , buttons=keyboard)
+    await bot.send_message(z,msg.read_msg('Introduction') , buttons=keyboard)
+
 
 @bot.on(events.CallbackQuery())
 async def handler(event):
-    pass
+        await event.respond("hi")
 def main():
     """Start the bot."""
     bot.run_until_disconnected()
