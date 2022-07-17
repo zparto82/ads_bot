@@ -11,16 +11,21 @@ bot_token = config.read("telegram","bot_token")
 
 bot = TelegramClient('bot', api_id, api_hash,proxy=('socks5','127.0.0.1',1080))
 bot.start(bot_token=bot_token)
+d = {
 
+}
 @bot.on(events.NewMessage(pattern="/start"))
 async def start(event):
     z = event.message.peer_id.user_id
-    code = code_creator.code()
-    d = {
-        z : code
-    }
     if z in d.keys():
         await bot.send_message(z,d[z])
+    else:
+        z = event.message.peer_id.user_id
+        code = code_creator.code()
+        c = d[z] = code
+        await bot.send_message(z,d[z])
+        print(d)
+
     print(z)
     print(event.message)
     keyboard = [
