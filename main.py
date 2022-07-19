@@ -21,12 +21,16 @@ async def start(event):
     z = event.message.peer_id
     t = datetime.datetime.now()
     code = code_creator.code()
-    db.users.insert_one({
-        "_id" : z,
-        "coin" : 0,
-        "registration_date" : t,
-        "code" : code,
-    })
+    try:
+        db.users.insert_one({
+            "_id" : z,
+            "coin" : 0,
+            "registration_date" : t,
+            "code" : code,
+        })
+
+    except:
+        pass
     print(event.message)
     keyboard = [
         [
@@ -49,21 +53,18 @@ async def start(event):
 async def code(event):
     print(event.message.peer_id)
 
-d = {
 
-}
 @bot.on(events.CallbackQuery())
 async def handler(event):
-    # if event.data == b'1':
-    #     z = event.original_update.user_id
-    #     if z in d.keys():
-    #         await bot.send_message(z,d[z])
-    #     else:
-    #         z = event.original_update.user_id
-    #         code = code_creator.code()
-    #         c = d[z] = code
-    #         await bot.send_message(z,msg.read_msg('code'))
-    #         await bot.send_message(z,d[z])
+    find = db.users.find_one({'_id':event.original_update.user_id})
+    code_2 = find['code']
+    print(code_2)
+    if event.data == b'1':
+        z = event.original_update.user_id
+        await bot.send_message(z, msg.read_msg('code'))
+        await bot.send_message(z,code_2)
+    else:
+        pass
 
 
 def main():
