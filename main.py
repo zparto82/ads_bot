@@ -52,7 +52,6 @@ async def handler(event):
             c = d[z] = code
             await bot.send_message(z,msg.read_msg('code'))
             await bot.send_message(z,d[z])
-            print(d)
 
 
 def main():
