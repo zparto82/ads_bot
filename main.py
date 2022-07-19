@@ -1,9 +1,9 @@
 import config
 import code_creator
 import msg
-import json
+import datetime
+from pymongo import MongoClient
 from telethon.sync import TelegramClient,events
-from telethon.tl.types import PeerUser
 from telethon import Button
 api_id = 86576
 api_hash = '385886b58b21b7f3762e1cde2d651925'
@@ -12,9 +12,21 @@ bot_token = config.read("telegram","bot_token")
 bot = TelegramClient('bot', api_id, api_hash,proxy=('socks5','127.0.0.1',1080))
 bot.start(bot_token=bot_token)
 
+
+mongo_client = MongoClient('127.0.0.1:27017')
+db = mongo_client.user
+
 @bot.on(events.NewMessage(pattern="/start"))
 async def start(event):
     z = event.message.peer_id
+    t = datetime.datetime.now()
+    code = code_creator.code()
+    db.users.insert_one({
+        "_id" : z,
+        "coin" : 0,
+        "registration_date" : t,
+        "code" : code,
+    })
     print(event.message)
     keyboard = [
         [
@@ -42,16 +54,16 @@ d = {
 }
 @bot.on(events.CallbackQuery())
 async def handler(event):
-    if event.data == b'1':
-        z = event.original_update.user_id
-        if z in d.keys():
-            await bot.send_message(z,d[z])
-        else:
-            z = event.original_update.user_id
-            code = code_creator.code()
-            c = d[z] = code
-            await bot.send_message(z,msg.read_msg('code'))
-            await bot.send_message(z,d[z])
+    # if event.data == b'1':
+    #     z = event.original_update.user_id
+    #     if z in d.keys():
+    #         await bot.send_message(z,d[z])
+    #     else:
+    #         z = event.original_update.user_id
+    #         code = code_creator.code()
+    #         c = d[z] = code
+    #         await bot.send_message(z,msg.read_msg('code'))
+    #         await bot.send_message(z,d[z])
 
 
 def main():
