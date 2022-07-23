@@ -18,7 +18,7 @@ db = mongo_client.user
 
 @bot.on(events.NewMessage(pattern="/start"))
 async def start(event):
-    z = event.message.peer_id
+    z = event.message.peer_id.user_id
     t = datetime.datetime.now()
     code = code_creator.code()
     try:
@@ -28,10 +28,11 @@ async def start(event):
             "registration_date" : t,
             "code" : code,
         })
-
     except:
+        # user = db.users.find_one({ '_id': z})
+        # code = user.get('code')
+        # print(code)
         pass
-    print(event.message)
     keyboard = [
         [
             Button.inline(str(msg.read_msg('connect')),b'1'),
@@ -47,18 +48,18 @@ async def start(event):
         ]
     ]
 
+
     await bot.send_message(z,msg.read_msg('Introduction') , buttons=keyboard)
 
 @bot.on(events.NewMessage(pattern="code:*"))
 async def code(event):
-    print(event.message.peer_id)
+    print(event.message.peer_id.user_id)
 
 
 @bot.on(events.CallbackQuery())
 async def handler(event):
-    find = db.users.find_one({'_id':event.original_update.user_id})
-    code_2 = find['code']
-    print(code_2)
+    find = db.users.find_one({'_id': event.original_update.user_id})
+    code_2 = find.get('code')
     if event.data == b'1':
         z = event.original_update.user_id
         await bot.send_message(z, msg.read_msg('code'))
