@@ -87,7 +87,7 @@ async def code(event):
         owner = find.get('_id')
     except:
         await bot.send_message(peer_id, msg.read_msg('code error'))
-        return
+        return 
 
     connection = await bot.get_entity(event.message.peer_id)
     full_info = await bot(GetFullChannelRequest(connection))

@@ -19,7 +19,7 @@ msgstr 'راهنما'
 msgid 'code'
 msgstr 'این کد را یک بار درون کانال یا گروه خود ارسال کنید بعدا میتوانید آن را پاک کنید:'
 
-msgid 'code error'
+msgid 'error code'
 msgstr 'همچین کدی وجود ندارد'
 
 msgid 'Error location'
