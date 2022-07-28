@@ -10,6 +10,7 @@ msgstr "نمایش تبلیغات"
 msgid "settings"
 msgstr "مدیریت و تنظیمات"
 
+
 msgid "buy coins"
 msgstr "خرید سکه"
 

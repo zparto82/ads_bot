@@ -89,6 +89,7 @@ async def code(event):
         await bot.send_message(peer_id, msg.read_msg('code error'))
         return
 
+
     connection = await bot.get_entity(event.message.peer_id)
     full_info = await bot(GetFullChannelRequest(connection))
     chat_title = full_info.chats[0].title
