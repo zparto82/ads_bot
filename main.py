@@ -87,7 +87,7 @@ async def code(event):
         owner = find.get('_id')
     except:
         await bot.send_message(peer_id, msg.read_msg('code error'))
-        return 
+        return
 
     connection = await bot.get_entity(event.message.peer_id)
     full_info = await bot(GetFullChannelRequest(connection))
@@ -116,6 +116,7 @@ async def handler(event):
     code_2 = find.get('code')
     if event.data == b'1':
         z = event.original_update.user_id
+        await bot.send_message(z,msg.read_msg('join'))
         await bot.send_message(z, msg.read_msg('code'))
         await bot.send_message(z, code_2)
     else:
