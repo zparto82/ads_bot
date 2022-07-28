@@ -1,45 +1,45 @@
 import config
 import code_creator
-from telethon import utils
 import msg
 import datetime
 from telethon.tl.types import PeerUser, PeerChat, PeerChannel
 from pymongo import MongoClient
-from telethon.sync import TelegramClient,events
+from telethon.sync import TelegramClient, events
 from telethon import Button
+from telethon.tl.functions.channels import GetFullChannelRequest
 api_id = 86576
 api_hash = '385886b58b21b7f3762e1cde2d651925'
-bot_token = config.read("telegram","bot_token")
+bot_token = config.read("telegram", "bot_token")
 
-bot = TelegramClient('bot', api_id, api_hash,proxy=('socks5','127.0.0.1',1080))
+bot = TelegramClient('bot', api_id, api_hash, proxy=('socks5', '127.0.0.1', 1080))
 bot.start(bot_token=bot_token)
-
 
 mongo_client = MongoClient('127.0.0.1:27017')
 db = mongo_client.user
+
+
 @bot.on(events.NewMessage())
 async def h(event):
     print(event.message)
+
+
 @bot.on(events.NewMessage(pattern="/start"))
 async def start(event):
     z = event.message.peer_id.user_id
     t = datetime.datetime.now()
-    code = code_creator.code()
+    code_3 = code_creator.code()
     try:
         db.users.insert_one({
-            "_id" : z,
-            "coin" : 0,
-            "registration_date" : t,
-            "code" : code,
+            "_id": z,
+            "coin": 0,
+            "registration_date": t,
+            "code": code_3,
         })
     except:
-        # user = db.users.find_one({ '_id': z})
-        # code = user.get('code')
-        # print(code)
         pass
     keyboard = [
         [
-            Button.inline(str(msg.read_msg('connect')),b'1'),
+            Button.inline(str(msg.read_msg('connect')), b'1'),
             Button.inline(str(msg.read_msg("create")), b"2"),
         ],
         [
@@ -52,34 +52,58 @@ async def start(event):
         ]
     ]
 
+    await bot.send_message(z, msg.read_msg('Introduction'), buttons=keyboard)
 
-    await bot.send_message(z,msg.read_msg('Introduction') , buttons=keyboard)
-    find = db.users.find_one({'_id': event.message.peer_id.user_id})
-    admin_id = find.get('_id')
-    db.connections.insert_one({
-        'owner' : admin_id
-    })
 
 @bot.on(events.NewMessage(pattern="code:*"))
 async def code(event):
-    print(event.message)
+    global owner
+    join_date = datetime.datetime.now()
+    message_text = event.message.message
+
     if type(event.message.peer_id) == PeerChannel:
+        chat_type = 'channel'
         peer_id = event.message.peer_id.channel_id
     elif type(event.message.peer_id) == PeerChat:
+        chat_type = 'group'
         peer_id = event.message.peer_id.chat_id
     elif type(event.message.peer_id) == PeerUser:
+        chat_type = 'user'
         peer_id = event.message.peer_id.user_id
     else:
+        chat_type = None
         peer_id = 0
 
-    chat_from = event.chat if event.chat else (await event.get_chat())  # telegram MAY not send the chat enity
-    chat_title = utils.get_display_name(chat_from)
+    if chat_type == 'group' or chat_type == 'channel':
+        pass
+    else:
+        await bot.send_message(peer_id, msg.read_msg('Error location'))
 
+    code_user = message_text
+    try:
+        find = db.users.find_one({
+            'code': code_user
+        })
+        owner = find.get('_id')
+    except:
+        await bot.send_message(peer_id, msg.read_msg('code error'))
+        return
+
+    connection = await bot.get_entity(event.message.peer_id)
+    full_info = await bot(GetFullChannelRequest(connection))
+    chat_title = full_info.chats[0].title
+    chat_info = full_info.full_chat.about
+    chat_members = full_info.full_chat.participants_count
     try:
         db.connections.insert_one({
-            '_id' : event.message.peer_id.user_id,
-            'title' : chat_title,
-            'type' : peer_id,
+            '_id': peer_id,
+            'owner': owner,
+            'title': chat_title,
+            'type': chat_type,
+            'join_date': join_date,
+            'members': chat_members,
+            'status': 'active',
+            'info': chat_info
         })
         print('ok')
     except:
@@ -93,7 +117,7 @@ async def handler(event):
     if event.data == b'1':
         z = event.original_update.user_id
         await bot.send_message(z, msg.read_msg('code'))
-        await bot.send_message(z,code_2)
+        await bot.send_message(z, code_2)
     else:
         pass
 
@@ -101,6 +125,7 @@ async def handler(event):
 def main():
     """Start the bot."""
     bot.run_until_disconnected()
+
 
 if __name__ == '__main__':
     main()
