@@ -20,7 +20,8 @@ db = mongo_client.user
 
 @bot.on(events.NewMessage())
 async def h(event):
-    print(event.message)
+    b = db.users.count_documents({'_id':event.message.peer_id.user_id})
+    print(b)
 
 
 @bot.on(events.NewMessage(pattern="/start"))
@@ -117,12 +118,34 @@ async def handler(event):
     find = db.users.find_one({'_id': event.original_update.user_id})
     code_2 = find.get('code')
     if event.data == b'1':
-        z = event.original_update.user_id
-        await bot.send_message(z,msg.read_msg('join'))
-        await bot.send_message(z, msg.read_msg('code'))
-        await bot.send_message(z, code_2)
+        user_id = event.original_update.user_id
+        await bot.send_message(user_id,msg.read_msg('join'))
+        await bot.send_message(user_id, msg.read_msg('code'))
+        await bot.send_message(user_id, code_2)
+    elif event.data == b'2':
+        user_id = event.original_update.user_id
+        async with bot.conversation(user_id) as conv:
+            msg1 = await conv.send_message(msg.read_msg('ads_text'))
+            text = await conv.get_response(timeout=1000000000)
+            ads_text = text.message
+            msg2 = await conv.send_message(msg.read_msg('ads_link'))
+            link = await conv.get_response(timeout=10000000000)
+            ads_link = link.message
+        count = db.ads.count_documents(({"owner_id" : user_id}))
+        ads_id = str(user_id) + "_" + str(count)
+        try:
+            db.ads.insert_one({
+                "_id" : ads_id,
+                "text" : ads_text,
+                "link" : ads_link,
+                "owner_id" : user_id
+            })
+            print('ok')
+        except:
+            print('error')
     else:
         pass
+
 
 
 def main():
