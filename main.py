@@ -78,6 +78,7 @@ async def code(event):
         pass
     else:
         await bot.send_message(peer_id, msg.read_msg('Error location'))
+        return
 
     code_user = message_text
     try:
