@@ -3,6 +3,7 @@ import code_creator
 import msg
 import datetime
 from telethon.tl.types import PeerUser, PeerChat, PeerChannel
+import pprint
 from pymongo import MongoClient
 from telethon.sync import TelegramClient, events
 from telethon import Button
@@ -40,16 +41,16 @@ async def start(event):
         pass
     keyboard = [
         [
-            Button.inline(str(msg.read_msg('connect')), b'1'),
-            Button.inline(str(msg.read_msg("create")), b"2"),
+            Button.inline(str(msg.read_msg('connect')), b'connect'),
+            Button.inline(str(msg.read_msg("create")), b"create"),
         ],
         [
-            Button.inline(msg.read_msg("show"), b"3"),
-            Button.inline(msg.read_msg("settings"), b"4")
+            Button.inline(msg.read_msg("show"), b"show"),
+            Button.inline(msg.read_msg("settings"), b"settings")
         ],
         [
-            Button.inline(msg.read_msg("buy coins"), b"5"),
-            Button.inline(msg.read_msg("help"), b"6")
+            Button.inline(msg.read_msg("buy coins"), b"buy coins"),
+            Button.inline(msg.read_msg("help"), b"help")
         ]
     ]
 
@@ -113,16 +114,18 @@ async def code(event):
         print('error')
 
 
+
 @bot.on(events.CallbackQuery())
 async def handler(event):
     find = db.users.find_one({'_id': event.original_update.user_id})
     code_2 = find.get('code')
-    if event.data == b'1':
+    if event.data == b'connect':
         user_id = event.original_update.user_id
         await bot.send_message(user_id,msg.read_msg('join'))
         await bot.send_message(user_id, msg.read_msg('code'))
         await bot.send_message(user_id, code_2)
-    elif event.data == b'2':
+    elif event.data == b'create':
+
         user_id = event.original_update.user_id
         async with bot.conversation(user_id) as conv:
             msg1 = await conv.send_message(msg.read_msg('ads_text'))
@@ -132,7 +135,9 @@ async def handler(event):
             link = await conv.get_response(timeout=10000000000)
             ads_link = link.message
         count = db.ads.count_documents(({"owner_id" : user_id}))
-        ads_id = str(user_id) + "_" + str(count)
+        print(count)
+        ads_id = str(user_id) + str("_") + str(count)
+        print(ads_id)
         try:
             db.ads.insert_one({
                 "_id" : ads_id,
@@ -143,9 +148,64 @@ async def handler(event):
             print('ok')
         except:
             print('error')
+        # ads = db.ads.find_one({'_id': ads_id})
+        # text = ads.get('text')
+        # print(text)
+        # link = ads.get('link')
+        # print(link)
+        find = db.ads.find_one({
+            '_id' : ads_id
+        })
+        print(find)
+        text = find.get('text')
+        print(text)
+        link = find.get('link')
+        print(link)
+
+
+
+    elif event.data == b'show':
+        user_id = event.original_update.user_id
+        i = 0
+        count = db.ads.count_documents(({"owner_id": user_id}))
+        keyboard = [
+            [
+                Button.inline(msg.read_msg("select"),data=b'select')
+            ]
+        ]
+        while i < count :
+            count_2 = count-i
+            ads_id = str(user_id) + str("_") + str(count_2)
+            find = db.ads.find_one({
+                '_id': ads_id
+            })
+            try:
+                text = find.get('text')
+                link = find.get('link')
+
+                if text == None :
+                    text = msg.read_msg('text not found')
+                if link == None :
+                    link = msg.read_msg('link not found')
+                perfect_ads = f"{text}\n{link}"
+                print(link)
+                await bot.send_message(user_id, perfect_ads,buttons=keyboard)
+
+            except:
+                pass
+
+            i = i + 1
+    elif event.data == b'select':
+        user_id = event.original_update.user_id
+        async with bot.conversation(user_id) as conv:
+            msg1 = await conv.send_message(msg.read_msg('how many coins'))
+            text = await conv.get_response(timeout=1000000000)
+            ads_text = text.message
+            print(ads_text)
+
+
     else:
         pass
-
 
 
 def main():
