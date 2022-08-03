@@ -3,7 +3,6 @@ import code_creator
 import msg
 import datetime
 from telethon.tl.types import PeerUser, PeerChat, PeerChannel
-import pprint
 from pymongo import MongoClient
 from telethon.sync import TelegramClient, events
 from telethon import Button
@@ -21,8 +20,9 @@ db = mongo_client.user
 
 @bot.on(events.NewMessage())
 async def h(event):
-    b = db.users.count_documents({'_id':event.message.peer_id.user_id})
-    print(b)
+    # 1562095035
+    # 1778853564
+    pass
 
 
 @bot.on(events.NewMessage(pattern="/start"))
@@ -148,20 +148,6 @@ async def handler(event):
             print('ok')
         except:
             print('error')
-        # ads = db.ads.find_one({'_id': ads_id})
-        # text = ads.get('text')
-        # print(text)
-        # link = ads.get('link')
-        # print(link)
-        find = db.ads.find_one({
-            '_id' : ads_id
-        })
-        print(find)
-        text = find.get('text')
-        print(text)
-        link = find.get('link')
-        print(link)
-
 
 
     elif event.data == b'show':
@@ -182,26 +168,35 @@ async def handler(event):
             try:
                 text = find.get('text')
                 link = find.get('link')
-
-                if text == None :
+                read = db.connections.find_one({
+                    'owner' : user_id
+                })
+                chat_id = read.get('_id')
+                if text is None:
                     text = msg.read_msg('text not found')
-                if link == None :
+                else:
+                    pass
+                if link is None:
                     link = msg.read_msg('link not found')
                 perfect_ads = f"{text}\n{link}"
-                print(link)
-                await bot.send_message(user_id, perfect_ads,buttons=keyboard)
 
+                await bot.send_message(user_id, perfect_ads, buttons=keyboard)
             except:
                 pass
 
+            else:
+                pass
+
+
             i = i + 1
+
     elif event.data == b'select':
         user_id = event.original_update.user_id
         async with bot.conversation(user_id) as conv:
             msg1 = await conv.send_message(msg.read_msg('how many coins'))
             text = await conv.get_response(timeout=1000000000)
             ads_text = text.message
-            print(ads_text)
+
 
 
     else:

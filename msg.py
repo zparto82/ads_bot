@@ -1,5 +1,5 @@
 import polib
-po = polib.pofile('msg.po')
+po = polib.pofile('C:\\Users\\Admin\\PycharmProjects\\ads_bot\\msg.po')
 msg = {}
 for entry in po:
     msg[entry.msgid] = entry.msgstr
