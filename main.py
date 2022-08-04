@@ -198,7 +198,6 @@ async def handler(event):
             ads_text = text.message
 
 
-
     else:
         pass
 
