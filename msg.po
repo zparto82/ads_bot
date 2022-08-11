@@ -44,6 +44,9 @@ msgstr 'متن تبلیغ خود را وارد کنید:'
 msgid 'ads_link'
 msgstr 'لینک تبلیغ خود را وارد کنید:'
 
+msgid 'waring_number'
+msgstr 'لطفا عدد وارد کنید !'
+
 msgid 'how many coins'
 msgstr 'چه مقدار سکه خرج می کنید ؟'
 msgid "Introduction"

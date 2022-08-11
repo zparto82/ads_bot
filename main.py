@@ -18,11 +18,11 @@ mongo_client = MongoClient('127.0.0.1:27017')
 db = mongo_client.user
 
 
-@bot.on(events.NewMessage())
-async def h(event):
-    # 1562095035
-    # 1778853564
-    pass
+# @bot.on(events.NewMessage())
+# async def h(event):
+#     # 1562095035
+#     # 1778853564
+#     pass
 
 
 @bot.on(events.NewMessage(pattern="/start"))
@@ -114,57 +114,80 @@ async def code(event):
         print('error')
 
 
+@bot.on(events.CallbackQuery(pattern='ad:*'))
+async def ad_handler(event):
+    zero = 0
+    ad_id = event.data.decode().split(':')[1]
+    user_id = event.original_update.user_id
+    async with bot.conversation(user_id, timeout=1000) as conv:
+        msg1 = await conv.send_message(msg.read_msg('how many coins'))
+        Quantity = await conv.get_response(timeout=1000)
+        ads_text = Quantity.message
+        ads_text_type = type(ads_text)
+        zero_type = type(zero)
+    while ads_text_type != zero_type :
+        while zero < 1 :
+            await bot.send_message(user_id,msg.read_msg('waring_number'))
+            zero = zero + 1
+
+
+        # check if user has enough coin
+        # deduct coins from user's balance
+        # log coin change
+        # insert into ad_pending
+        print("ok count_2")
+
+
 
 @bot.on(events.CallbackQuery())
 async def handler(event):
     find = db.users.find_one({'_id': event.original_update.user_id})
     code_2 = find.get('code')
+    global keyboard
+
     if event.data == b'connect':
         user_id = event.original_update.user_id
         await bot.send_message(user_id,msg.read_msg('join'))
         await bot.send_message(user_id, msg.read_msg('code'))
         await bot.send_message(user_id, code_2)
-    elif event.data == b'create':
 
+    elif event.data == b'create':
         user_id = event.original_update.user_id
-        async with bot.conversation(user_id) as conv:
+        async with bot.conversation(user_id, timeout=1000) as conv:
             msg1 = await conv.send_message(msg.read_msg('ads_text'))
-            text = await conv.get_response(timeout=1000000000)
+            text = await conv.get_response(timeout=1000)
             ads_text = text.message
             msg2 = await conv.send_message(msg.read_msg('ads_link'))
-            link = await conv.get_response(timeout=10000000000)
+            link = await conv.get_response(timeout=1000)
             ads_link = link.message
-        count = db.ads.count_documents(({"owner_id" : user_id}))
-        print(count)
-        ads_id = str(user_id) + str("_") + str(count)
-        print(ads_id)
-        try:
-            db.ads.insert_one({
-                "_id" : ads_id,
-                "text" : ads_text,
-                "link" : ads_link,
-                "owner_id" : user_id
-            })
-            print('ok')
-        except:
-            print('error')
-
+            count = db.ads.count_documents(({"owner_id" : user_id}))
+            print(count)
+            ads_id = str(user_id) + str("_") + str(count)
+            print(ads_id)
+            try:
+                db.ads.insert_one({
+                    "_id" : ads_id,
+                    "text" : ads_text,
+                    "link" : ads_link,
+                    "owner_id" : user_id
+                })
+                print('create ok')
+            except:
+                print('error in create')
 
     elif event.data == b'show':
         user_id = event.original_update.user_id
         i = 0
         count = db.ads.count_documents(({"owner_id": user_id}))
-        keyboard = [
-            [
-                Button.inline(msg.read_msg("select"),data=b'select')
-            ]
-        ]
+
         while i < count :
             count_2 = count-i
             ads_id = str(user_id) + str("_") + str(count_2)
             find = db.ads.find_one({
                 '_id': ads_id
             })
+
+
             try:
                 text = find.get('text')
                 link = find.get('link')
@@ -187,19 +210,24 @@ async def handler(event):
             else:
                 pass
 
-
             i = i + 1
-
-    elif event.data == b'select':
         user_id = event.original_update.user_id
-        async with bot.conversation(user_id) as conv:
-            msg1 = await conv.send_message(msg.read_msg('how many coins'))
-            text = await conv.get_response(timeout=1000000000)
-            ads_text = text.message
+        i = 0
+        count = db.ads.count_documents(({"owner_id": user_id}))
 
+        while i < count:
+            count_2 = count - i
+            ads_id = str(user_id) + str("_") + str(count_2)
+            query = db.ads.find_one({
+                '_id' : ads_id
+            })
 
-    else:
-        pass
+            keyboard = [
+                [
+                    Button.inline(msg.read_msg("select"), data=str.encode('ad:' + ads_id))
+                ]
+            ]
+            i = i + 1
 
 
 def main():
