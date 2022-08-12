@@ -1,3 +1,4 @@
+import coins
 import config
 import code_creator
 import msg
@@ -27,14 +28,14 @@ db = mongo_client.user
 
 @bot.on(events.NewMessage(pattern="/start"))
 async def start(event):
-    z = event.message.peer_id.user_id
-    t = datetime.datetime.now()
+    user_id = event.message.peer_id.user_id
+    time = datetime.datetime.now()
     code_3 = code_creator.code()
     try:
         db.users.insert_one({
-            "_id": z,
-            "coin": 0,
-            "registration_date": t,
+            "_id": user_id,
+            "coin": 1000000,
+            "registration_date": time,
             "code": code_3,
         })
     except:
@@ -51,10 +52,14 @@ async def start(event):
         [
             Button.inline(msg.read_msg("buy coins"), b"buy coins"),
             Button.inline(msg.read_msg("help"), b"help")
+        ],
+        [
+            Button.inline(msg.read_msg('menu'),b'menu')
         ]
     ]
 
-    await bot.send_message(z, msg.read_msg('Introduction'), buttons=keyboard)
+
+    await bot.send_message(user_id, msg.read_msg('Introduction'), buttons=keyboard)
 
 
 @bot.on(events.NewMessage(pattern="code:*"))
@@ -116,24 +121,38 @@ async def code(event):
 
 @bot.on(events.CallbackQuery(pattern='ad:*'))
 async def ad_handler(event):
-    zero = 0
     ad_id = event.data.decode().split(':')[1]
     user_id = event.original_update.user_id
     async with bot.conversation(user_id, timeout=1000) as conv:
-        msg1 = await conv.send_message(msg.read_msg('how many coins'))
-        Quantity = await conv.get_response(timeout=1000)
-        ads_text = Quantity.message
-        ads_text_type = type(ads_text)
-        zero_type = type(zero)
-    while ads_text_type != zero_type :
-        while zero < 1 :
-            await bot.send_message(user_id,msg.read_msg('waring_number'))
-            zero = zero + 1
-
-
+        is_coin_number = False
+        while not is_coin_number:
+            msg1 = await conv.send_message(msg.read_msg('how many coins'))
+            quantity = await conv.get_response(timeout=1000)
+            try:
+                pending_coin = int(quantity.message)
+                is_coin_number = True
+                print('ok')
+            except:
+                print('error')
+                await bot.send_message(user_id,msg.read_msg('waring_number'))
         # check if user has enough coin
-        # deduct coins from user's balance
-        # log coin change
+        find = db.users.find_one({'_id':user_id})
+        coin = find.get('coin')
+        print(coin)
+        if coin < pending_coin or pending_coin <= 0:
+            await bot.send_message(user_id,msg.read_msg("don't_have_enough_coins"))
+        else:
+            # deduct coins from user's balance
+            new_coin = coin-pending_coin
+            print("new_coin",new_coin)
+            update = db.users.update_one({'_id':user_id},{'$set':{'coin':new_coin}})
+            print("update",update)
+
+            # log coin change
+            change_date = datetime.datetime.now()
+            log_coin_change = coins.coin(user_id,new_coin,msg.read_msg('reason'),change_date,db)
+            print('log',log_coin_change)
+
         # insert into ad_pending
         print("ok count_2")
 
@@ -228,6 +247,13 @@ async def handler(event):
                 ]
             ]
             i = i + 1
+
+    elif event.data == b'menu' :
+        user_id = event.original_update.user_id
+        markup = event.client.build_reply_markup([
+            [Button.text('/start')],
+        ])
+        await event.respond(msg.read_msg('menu_Application'),buttons=markup)
 
 
 def main():

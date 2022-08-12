@@ -44,6 +44,18 @@ msgstr 'متن تبلیغ خود را وارد کنید:'
 msgid 'ads_link'
 msgstr 'لینک تبلیغ خود را وارد کنید:'
 
+msgid 'menu'
+msgstr 'منو'
+
+msgid 'reason'
+msgstr 'Advertising order'
+
+msgid "don't_have_enough_coins"
+msgstr "شما سکه کافی ندارید"
+
+msgid 'menu_Application'
+msgstr 'این منو به شما کمک میکند راحت تر دستور ها را وارد کنید'
+
 msgid 'waring_number'
 msgstr 'لطفا عدد وارد کنید !'
 
