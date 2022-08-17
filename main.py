@@ -98,25 +98,32 @@ async def code(event):
         return
 
 
-    connection = await bot.get_entity(event.message.peer_id)
-    full_info = await bot(GetFullChannelRequest(connection))
-    chat_title = full_info.chats[0].title
-    chat_info = full_info.full_chat.about
-    chat_members = full_info.full_chat.participants_count
+
     try:
-        db.connections.insert_one({
-            '_id': peer_id,
-            'owner': owner,
-            'title': chat_title,
-            'type': chat_type,
-            'join_date': join_date,
-            'members': chat_members,
-            'status': 'active',
-            'info': chat_info
-        })
-        print('ok')
+        connection = await bot.get_entity(event.message.peer_id)
+        full_info = await bot(GetFullChannelRequest(connection))
+        chat_title = full_info.chats[0].title
+        chat_info = full_info.full_chat.about
+        chat_members = full_info.full_chat.participants_count
+        try:
+            db.connections.insert_one({
+                '_id': peer_id,
+                'owner': owner,
+                'title': chat_title,
+                'type': chat_type,
+                'join_date': join_date,
+                'members': chat_members,
+                'status': 'active',
+                'info': chat_info
+            })
+            print('ok')
+        except:
+            print('error')
     except:
-        print('error')
+        pass
+
+
+
 
 
 @bot.on(events.CallbackQuery(pattern='ad:*'))
@@ -138,7 +145,8 @@ async def ad_handler(event):
         # check if user has enough coin
         find = db.users.find_one({'_id':user_id})
         coin = find.get('coin')
-        print(coin)
+        print("coin_number",coin)
+        print(type(coin))
         if coin < pending_coin or pending_coin <= 0:
             await bot.send_message(user_id,msg.read_msg("don't_have_enough_coins"))
         else:
@@ -162,7 +170,7 @@ async def ad_handler(event):
 async def handler(event):
     find = db.users.find_one({'_id': event.original_update.user_id})
     code_2 = find.get('code')
-    global keyboard
+    global perfect_ads
 
     if event.data == b'connect':
         user_id = event.original_update.user_id
@@ -196,57 +204,53 @@ async def handler(event):
 
     elif event.data == b'show':
         user_id = event.original_update.user_id
-        i = 0
-        count = db.ads.count_documents(({"owner_id": user_id}))
+        zero = 1
+        count_3 = db.ads.count_documents(({"owner_id": user_id}))
 
-        while i < count :
-            count_2 = count-i
-            ads_id = str(user_id) + str("_") + str(count_2)
-            find = db.ads.find_one({
-                '_id': ads_id
-            })
+        while zero < count_3:
+            i = 1
+            count = db.ads.count_documents(({"owner_id": user_id}))
 
+            while i < count:
+                count_2 = count_3 - zero
+                ads_id_2 = str(user_id) + str("_") + str(count_2)
 
-            try:
-                text = find.get('text')
-                link = find.get('link')
-                read = db.connections.find_one({
-                    'owner' : user_id
-                })
-                chat_id = read.get('_id')
-                if text is None:
-                    text = msg.read_msg('text not found')
-                else:
-                    pass
-                if link is None:
-                    link = msg.read_msg('link not found')
-                perfect_ads = f"{text}\n{link}"
-
-                await bot.send_message(user_id, perfect_ads, buttons=keyboard)
-            except:
-                pass
-
-            else:
-                pass
-
-            i = i + 1
-        user_id = event.original_update.user_id
-        i = 0
-        count = db.ads.count_documents(({"owner_id": user_id}))
-
-        while i < count:
-            count_2 = count - i
-            ads_id = str(user_id) + str("_") + str(count_2)
-            query = db.ads.find_one({
-                '_id' : ads_id
-            })
-
-            keyboard = [
-                [
-                    Button.inline(msg.read_msg("select"), data=str.encode('ad:' + ads_id))
+                keyboard = [
+                    [
+                        Button.inline(msg.read_msg("select"), data=str.encode('ad:' + ads_id_2))
+                    ]
                 ]
-            ]
-            i = i + 1
+                zero = zero + 1
+                count_2 = count - i
+                ads_id = str(user_id) + str("_") + str(count_2)
+                find = db.ads.find_one({
+                    '_id': ads_id
+                })
+
+                try:
+                    text = find.get('text')
+                    link = find.get('link')
+                    read = db.connections.find_one({
+                        'owner': user_id
+                    })
+                    chat_id = read.get('_id')
+                    if text is None:
+                        text = msg.read_msg('text not found')
+                    else:
+                        pass
+                    if link is None:
+                        link = msg.read_msg('link not found')
+                    perfect_ads = f"{text}\n{link}"
+                    await bot.send_message(user_id, perfect_ads, buttons=keyboard)
+
+                except:
+                    pass
+
+                i = i + 1
+
+
+
+
 
     elif event.data == b'menu' :
         user_id = event.original_update.user_id
