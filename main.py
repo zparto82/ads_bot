@@ -161,7 +161,11 @@ async def ad_handler(event):
             log_coin_change = coins.coin(user_id,new_coin,msg.read_msg('reason'),change_date,db)
             print('log',log_coin_change)
 
-        # insert into ad_pending
+            # insert into ad_pending
+            db.ad_pending.insert_one({
+                'Number of coins' : pending_coin,
+                'ad_id' : ad_id,
+            })
         print("ok count_2")
 
 
@@ -207,7 +211,7 @@ async def handler(event):
             i = 1
             count = db.ads.count_documents(({"owner_id": user_id}))
 
-            while i < count:
+            while i <= count:
                 count_2 = count - i
                 ads_id = str(user_id) + str("_") + str(count_2)
 
@@ -229,8 +233,6 @@ async def handler(event):
                     chat_id = read.get('_id')
                     if text is None:
                         text = msg.read_msg('text not found')
-                    else:
-                        pass
                     if link is None:
                         link = msg.read_msg('link not found')
                     perfect_ads = f"{text}\n{link}"
