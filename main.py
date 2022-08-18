@@ -170,7 +170,6 @@ async def ad_handler(event):
 async def handler(event):
     find = db.users.find_one({'_id': event.original_update.user_id})
     code_2 = find.get('code')
-    global perfect_ads
 
     if event.data == b'connect':
         user_id = event.original_update.user_id
@@ -203,26 +202,20 @@ async def handler(event):
                 print('error in create')
 
     elif event.data == b'show':
-        user_id = event.original_update.user_id
-        zero = 1
-        count_3 = db.ads.count_documents(({"owner_id": user_id}))
+            user_id = event.original_update.user_id
 
-        while zero < count_3:
             i = 1
             count = db.ads.count_documents(({"owner_id": user_id}))
 
             while i < count:
-                count_2 = count_3 - zero
-                ads_id_2 = str(user_id) + str("_") + str(count_2)
+                count_2 = count - i
+                ads_id = str(user_id) + str("_") + str(count_2)
 
                 keyboard = [
                     [
-                        Button.inline(msg.read_msg("select"), data=str.encode('ad:' + ads_id_2))
+                        Button.inline(msg.read_msg("select"), data=str.encode('ad:' + ads_id))
                     ]
                 ]
-                zero = zero + 1
-                count_2 = count - i
-                ads_id = str(user_id) + str("_") + str(count_2)
                 find = db.ads.find_one({
                     '_id': ads_id
                 })
