@@ -163,7 +163,7 @@ async def ad_handler(event):
 
             # insert into ad_pending
             db.ad_pending.insert_one({
-                'Number of coins' : pending_coin,
+                'Number_of_coins' : pending_coin,
                 'ad_id' : ad_id,
             })
         print("ok count_2")
