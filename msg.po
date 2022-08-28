@@ -10,7 +10,8 @@ msgstr "نمایش تبلیغات"
 msgid "settings"
 msgstr "مدیریت و تنظیمات"
 
-
+msgid 'reason_Show_ad'
+msgstr 'Show_ad'
 msgid "buy coins"
 msgstr "خرید سکه"
 
@@ -31,7 +32,8 @@ msgstr 'متنی ثبت نشده!'
 
 msgid 'select'
 msgstr 'انتخاب'
-
+msgid 'not_admin'
+msgstr 'شما یا مارا در گروه و کانال خود اضافه نکردید یا ما را به عنوان ادمین اضافه نکردید'
 msgid 'link not found'
 msgstr 'لینکی ثبت نشده!'
 
@@ -47,8 +49,8 @@ msgstr 'لینک تبلیغ خود را وارد کنید:'
 msgid 'menu'
 msgstr 'منو'
 
-msgid 'reason'
-msgstr 'Advertising order'
+msgid 'reason_Advertising_order'
+msgstr 'Advertising_order'
 
 msgid "don't_have_enough_coins"
 msgstr "شما سکه کافی ندارید"

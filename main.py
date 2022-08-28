@@ -34,7 +34,7 @@ async def start(event):
     try:
         db.users.insert_one({
             "_id": user_id,
-            "coin": 1000000,
+            "coin": 100,
             "registration_date": time,
             "code": code_3,
         })
@@ -96,9 +96,6 @@ async def code(event):
     except:
         await bot.send_message(peer_id, msg.read_msg('code error'))
         return
-
-
-
     try:
         connection = await bot.get_entity(event.message.peer_id)
         full_info = await bot(GetFullChannelRequest(connection))
@@ -119,12 +116,8 @@ async def code(event):
             print('ok')
         except:
             print('error')
-    except:
-        pass
-
-
-
-
+    except Exception as e:
+        print(e)
 
 @bot.on(events.CallbackQuery(pattern='ad:*'))
 async def ad_handler(event):
@@ -158,14 +151,16 @@ async def ad_handler(event):
 
             # log coin change
             change_date = datetime.datetime.now()
-            log_coin_change = coins.coin(user_id,new_coin,msg.read_msg('reason'),change_date,db)
+            log_coin_change = coins.coin(user_id,-pending_coin,msg.read_msg('reason'),change_date,db)
             print('log',log_coin_change)
 
             # insert into ad_pending
-            db.ad_pending.insert_one({
+
+            insert = db.ad_pending.insert_one({
                 'Number_of_coins' : pending_coin,
                 'ad_id' : ad_id,
             })
+            print('ad_pending',insert)
         print("ok count_2")
 
 
@@ -239,14 +234,9 @@ async def handler(event):
                     await bot.send_message(user_id, perfect_ads, buttons=keyboard)
 
                 except:
-                    pass
+                    await bot.send_message(user_id,msg.read_msg('not_admin'))
 
                 i = i + 1
-
-
-
-
-
     elif event.data == b'menu' :
         user_id = event.original_update.user_id
         markup = event.client.build_reply_markup([
