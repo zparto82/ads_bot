@@ -3,6 +3,7 @@ import config
 import code_creator
 import msg
 import datetime
+import background
 from telethon.tl.types import PeerUser, PeerChat, PeerChannel
 from pymongo import MongoClient
 from telethon.sync import TelegramClient, events
@@ -23,7 +24,8 @@ db = mongo_client.user
 # async def h(event):
 #     # 1562095035
 #     # 1778853564
-#     pass
+#     await bot.send_message(1778853564,'hi')
+#     print(event.message)
 
 
 @bot.on(events.NewMessage(pattern="/start"))
@@ -121,6 +123,10 @@ async def code(event):
 
 @bot.on(events.CallbackQuery(pattern='ad:*'))
 async def ad_handler(event):
+    print(event.original_update)
+    post_id = event.original_update.msg_id
+    print(type(post_id))
+    print(post_id)
     ad_id = event.data.decode().split(':')[1]
     user_id = event.original_update.user_id
     async with bot.conversation(user_id, timeout=1000) as conv:
@@ -161,6 +167,10 @@ async def ad_handler(event):
                 'ad_id' : ad_id,
             })
             print('ad_pending',insert)
+            # send ads to channels
+            print('ad_id: ', ad_id)
+            send_ad = await background.background(ad_id,user_id,bot,db)
+            print(send_ad)
         print("ok count_2")
 
 

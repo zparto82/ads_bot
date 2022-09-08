@@ -6,5 +6,5 @@ def coin(user, coin_change, reason, change_date,client):
         'reason': reason,
         'change_data' : change_date,
     })
-
+    print('coin_method_insert',insert)
     return insert
