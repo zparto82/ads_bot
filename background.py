@@ -2,7 +2,7 @@ import send_ads
 import coins
 import msg
 import datetime
-async def background(ad_id,user_id,client,db):
+async def background(ad_id, client, db):
         date_time = datetime.datetime.now()
         # check ad_pending
         ad_pending_find = db.ad_pending.find_one({'ad_id':ad_id})
@@ -15,31 +15,24 @@ async def background(ad_id,user_id,client,db):
         try:
             find_connections = db.connections.find({'members':{'$lte': number_of_coin}})
             for index,group in enumerate(find_connections):
-                print('group',group)
-                print('group_index',index)
                 channel_id = group.get('_id')
                 members = group.get('members')
                 send_ads_in_back = await send_ads.send_ads(text, link, channel_id, client)
                 post_id = send_ads_in_back.id
-                owner_id = group.get('owner_id')
-                print('owner_id :',owner_id)
-                print('post_id is :', post_id)
+                owner_id = group.get('owner')
+                # ad_pending --
+                number_of_coin = number_of_coin - members
+                update = db.ad_pending.update_one({'ad_id': ad_id}, {'$set': {'Number_of_coins': number_of_coin}})
+                # owner_connections ++
+                update_user_coin = db.users.update_one({'_id': owner_id}, {'$inc': {'coin': members}})
+                # log coins collection
+                log_coin_change = coins.coin(owner_id, members, msg.read_msg('reason_Show_ad'), date_time, db)
                 ad_connection = db.ad_connection.insert_one({
-                    "_id": ad_id,
+                    "ad_id": ad_id,
                     "post_id": post_id,
                     "connection_id": channel_id,
                     "start_date": date_time,
                 })
-                # ad_pending --
-                number_of_coin = number_of_coin - members
-                print('number_of_coin : ',number_of_coin)
-                update = db.ad_pending.update_one({'ad_id': ad_id}, {'$set': {'Number_of_coins': number_of_coin}})
-                print('update_in_back_ad_pending', update)
-                # owner_connections ++
-                update_user_coin = db.users.update_one({'_id': owner_id}, {'$inc': {'coin': number_of_coin}})
-                print('user_coin_update', update_user_coin)
-                # log coins collection
-                log_coin_change = coins.coin(owner_id, number_of_coin, msg.read_msg('reason_Show_ad'), date_time, db)
         except:
             pass
 

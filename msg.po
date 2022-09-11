@@ -12,6 +12,7 @@ msgstr "مدیریت و تنظیمات"
 
 msgid 'reason_Show_ad'
 msgstr 'Show_ad'
+
 msgid "buy coins"
 msgstr "خرید سکه"
 

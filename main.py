@@ -12,20 +12,10 @@ from telethon.tl.functions.channels import GetFullChannelRequest
 api_id = 86576
 api_hash = '385886b58b21b7f3762e1cde2d651925'
 bot_token = config.read("telegram", "bot_token")
-
 bot = TelegramClient('bot', api_id, api_hash, proxy=('socks5', '127.0.0.1', 1080))
 bot.start(bot_token=bot_token)
-
 mongo_client = MongoClient('127.0.0.1:27017')
 db = mongo_client.user
-
-
-# @bot.on(events.NewMessage())
-# async def h(event):
-#     # 1562095035
-#     # 1778853564
-#     await bot.send_message(1778853564,'hi')
-#     print(event.message)
 
 
 @bot.on(events.NewMessage(pattern="/start"))
@@ -59,8 +49,6 @@ async def start(event):
             Button.inline(msg.read_msg('menu'),b'menu')
         ]
     ]
-
-
     await bot.send_message(user_id, msg.read_msg('Introduction'), buttons=keyboard)
 
 
@@ -115,18 +103,14 @@ async def code(event):
                 'status': 'active',
                 'info': chat_info
             })
-            print('ok')
         except:
-            print('error')
-    except Exception as e:
-        print(e)
+            pass
+    except:
+        pass
 
 @bot.on(events.CallbackQuery(pattern='ad:*'))
 async def ad_handler(event):
-    print(event.original_update)
     post_id = event.original_update.msg_id
-    print(type(post_id))
-    print(post_id)
     ad_id = event.data.decode().split(':')[1]
     user_id = event.original_update.user_id
     async with bot.conversation(user_id, timeout=1000) as conv:
@@ -137,28 +121,21 @@ async def ad_handler(event):
             try:
                 pending_coin = int(quantity.message)
                 is_coin_number = True
-                print('ok')
             except:
-                print('error')
                 await bot.send_message(user_id,msg.read_msg('waring_number'))
         # check if user has enough coin
         find = db.users.find_one({'_id':user_id})
         coin = find.get('coin')
-        print("coin_number",coin)
-        print(type(coin))
         if coin < pending_coin or pending_coin <= 0:
             await bot.send_message(user_id,msg.read_msg("don't_have_enough_coins"))
         else:
             # deduct coins from user's balance
             new_coin = coin-pending_coin
-            print("new_coin",new_coin)
             update = db.users.update_one({'_id':user_id},{'$set':{'coin':new_coin}})
-            print("update",update)
 
             # log coin change
             change_date = datetime.datetime.now()
             log_coin_change = coins.coin(user_id,-pending_coin,msg.read_msg('reason'),change_date,db)
-            print('log',log_coin_change)
 
             # insert into ad_pending
 
@@ -166,12 +143,8 @@ async def ad_handler(event):
                 'Number_of_coins' : pending_coin,
                 'ad_id' : ad_id,
             })
-            print('ad_pending',insert)
             # send ads to channels
-            print('ad_id: ', ad_id)
-            send_ad = await background.background(ad_id,user_id,bot,db)
-            print(send_ad)
-        print("ok count_2")
+            send_ad = await background.background(ad_id,bot,db)
 
 
 
@@ -196,9 +169,7 @@ async def handler(event):
             link = await conv.get_response(timeout=1000)
             ads_link = link.message
             count = db.ads.count_documents(({"owner_id" : user_id}))
-            print(count)
             ads_id = str(user_id) + str("_") + str(count)
-            print(ads_id)
             try:
                 db.ads.insert_one({
                     "_id" : ads_id,
@@ -206,20 +177,17 @@ async def handler(event):
                     "link" : ads_link,
                     "owner_id" : user_id
                 })
-                print('create ok')
             except:
-                print('error in create')
+                pass
 
     elif event.data == b'show':
             user_id = event.original_update.user_id
-
             i = 1
             count = db.ads.count_documents(({"owner_id": user_id}))
 
             while i <= count:
                 count_2 = count - i
                 ads_id = str(user_id) + str("_") + str(count_2)
-
                 keyboard = [
                     [
                         Button.inline(msg.read_msg("select"), data=str.encode('ad:' + ads_id))
@@ -232,10 +200,6 @@ async def handler(event):
                 try:
                     text = find.get('text')
                     link = find.get('link')
-                    read = db.connections.find_one({
-                        'owner': user_id
-                    })
-                    chat_id = read.get('_id')
                     if text is None:
                         text = msg.read_msg('text not found')
                     if link is None:
