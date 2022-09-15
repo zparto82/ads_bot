@@ -143,8 +143,7 @@ async def ad_handler(event):
                 'Number_of_coins' : pending_coin,
                 'ad_id' : ad_id,
             })
-            # send ads to channels
-            send_ad = await background.background(ad_id,bot,db)
+
 
 
 
