@@ -35,13 +35,13 @@ for index, group in enumerate(find_connections):
         continue
     try:
         filter_24h = db.ad_connection.find({'connection_id': channel_id}).sort('start_date', -1).limit(1)
+        start_date = 0
+        for ad_24h in filter_24h:
+            start_date = ad_24h.get('start_date')
+        if date_time - start_date < datetime.timedelta(days=1):
+            continue
     except:
         pass
-    start_date = 0
-    for ad_24h in filter_24h:
-        start_date = ad_24h.get('start_date')
-    if date_time - start_date < datetime.timedelta(days=1):
-        continue
     send_ads_in_back = send_ads.send_ads(text, link, channel_id, client)
     post_id = send_ads_in_back.id
     owner_id = group.get('owner')
