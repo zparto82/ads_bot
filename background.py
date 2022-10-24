@@ -8,7 +8,7 @@ from telethon.sync import TelegramClient
 api_id = 86576
 api_hash = '385886b58b21b7f3762e1cde2d651925'
 bot_token = config.read("telegram", "bot_token")
-client = TelegramClient('bot', api_id, api_hash, proxy=('socks5', '127.0.0.1', 1080))
+client = TelegramClient('bot_background', api_id, api_hash, proxy=('socks5', '127.0.0.1', 1080))
 client.start(bot_token=bot_token)
 mongo_client = MongoClient('127.0.0.1:27017')
 db = mongo_client.user
@@ -31,6 +31,10 @@ find_connections = db.connections.find({'members': {'$lte': number_of_coin}})
 for index, group in enumerate(find_connections):
     channel_id = group.get('_id')
     members = group.get('members')
+    owner_id = group.get('owner')
+    ads_owner = db.ads.find_one({'_id':ad_id})
+    if ads_owner['owner_id'] == owner_id:
+        continue
     if number_of_coin < members:
         continue
     try:
@@ -42,9 +46,14 @@ for index, group in enumerate(find_connections):
             continue
     except:
         pass
-    send_ads_in_back = send_ads.send_ads(text, link, channel_id, client)
-    post_id = send_ads_in_back.id
-    owner_id = group.get('owner')
+
+    try:
+        send_ads_in_back = send_ads.send_ads(text, link, channel_id, client)
+        post_id = send_ads_in_back.id
+    except Exception as e:
+        print(e)
+        continue
+
     # ad_pending --
     number_of_coin = number_of_coin - members
     print(number_of_coin, members)
@@ -62,3 +71,4 @@ for index, group in enumerate(find_connections):
 
 mongo_client.close()
 
+client.disconnect()

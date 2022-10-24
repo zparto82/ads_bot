@@ -3,7 +3,6 @@ import config
 import code_creator
 import msg
 import datetime
-import background
 from telethon.tl.types import PeerUser, PeerChat, PeerChannel
 from pymongo import MongoClient
 from telethon.sync import TelegramClient, events
