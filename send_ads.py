@@ -1,4 +1,5 @@
 import msg
+from telethon.tl.types import PeerChannel, PeerChat
 
 
 def send_ads(text, link, channel_id, client):
@@ -11,4 +12,8 @@ def send_ads(text, link, channel_id, client):
     else:
         pass
     perfect_ads = f"{text}\n{link}"
-    return client.send_message(channel_id, perfect_ads)
+    try:
+        sent = client.send_message(PeerChannel(channel_id=channel_id), perfect_ads)
+    except:
+        sent = client.send_message(PeerChat(chat_id=channel_id), perfect_ads)
+    return sent

@@ -46,12 +46,11 @@ for index, group in enumerate(find_connections):
             continue
     except:
         pass
-
     try:
         send_ads_in_back = send_ads.send_ads(text, link, channel_id, client)
         post_id = send_ads_in_back.id
-    except Exception as e:
-        print(e)
+    except Exception as error:
+        print(error)
         continue
 
     # ad_pending --
