@@ -83,7 +83,7 @@ async def code(event):
         })
         owner = find.get('_id')
     except:
-        await bot.send_message(peer_id, msg.read_msg('code error'))
+        await bot.send_message(peer_id, msg.read_msg('error_code'))
         return
     try:
         connection = await bot.get_entity(event.message.peer_id)
@@ -102,8 +102,9 @@ async def code(event):
                 'status': 'active',
                 'info': chat_info
             })
+            await bot.send_message(peer_id,msg.read_msg("Channel_added_successfully"))
         except:
-            pass
+            await bot.send_message(peer_id,msg.read_msg("This_channel/group_has_already_been_added"))
     except:
         pass
 
@@ -137,11 +138,14 @@ async def ad_handler(event):
             log_coin_change = coins.coin(user_id,-pending_coin,msg.read_msg('reason'),change_date,db)
 
             # insert into ad_pending
-
-            insert = db.ad_pending.insert_one({
-                'Number_of_coins' : pending_coin,
-                'ad_id' : ad_id,
-            })
+            try:
+                insert = db.ad_pending.insert_one({
+                    'Number_of_coins' : pending_coin,
+                    'ad_id' : ad_id,
+                })
+                await bot.send_message(user_id,msg.read_msg('The_coin_was_spent_successfully'))
+            except:
+                pass
 
 
 
@@ -175,6 +179,7 @@ async def handler(event):
                     "link" : ads_link,
                     "owner_id" : user_id
                 })
+                await bot.send_message(user_id,msg.read_msg('The_ad_was_created_successfully'))
             except:
                 pass
 
