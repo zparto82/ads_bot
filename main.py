@@ -11,7 +11,10 @@ from telethon.tl.functions.channels import GetFullChannelRequest
 api_id = 86576
 api_hash = '385886b58b21b7f3762e1cde2d651925'
 bot_token = config.read("telegram", "bot_token")
-bot = TelegramClient('bot', api_id, api_hash, proxy=('socks5', '127.0.0.1', 1080))
+if config.read('telegram', 'proxy') == 'True':
+    bot = TelegramClient('bot', api_id, api_hash, proxy=('socks5', '127.0.0.1', 1080))
+else:
+    bot = TelegramClient('bot', api_id, api_hash)
 bot.start(bot_token=bot_token)
 mongo_client = MongoClient('127.0.0.1:27017')
 db = mongo_client.user
