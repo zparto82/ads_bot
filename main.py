@@ -105,7 +105,7 @@ async def code(event):
                 'status': 'active',
                 'info': chat_info
             })
-            await bot.send_message(peer_id,msg.read_msg("Channel_added_successfully"))
+            await bot.send_message(peer_id, msg.read_msg("Channel_added_successfully"))
         except:
             await bot.send_message(peer_id,msg.read_msg("This_channel/group_has_already_been_added"))
     except:

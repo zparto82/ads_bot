@@ -8,7 +8,10 @@ from telethon.sync import TelegramClient
 api_id = 86576
 api_hash = '385886b58b21b7f3762e1cde2d651925'
 bot_token = config.read("telegram", "bot_token")
-client = TelegramClient('bot_background', api_id, api_hash, proxy=('socks5', '127.0.0.1', 1080))
+if config.read('telegram', 'proxy') == 'True':
+    client = TelegramClient('bot_background', api_id, api_hash, proxy=('socks5', '127.0.0.1', 1080))
+else:
+    client = TelegramClient('bot_background', api_id, api_hash)
 client.start(bot_token=bot_token)
 mongo_client = MongoClient('127.0.0.1:27017')
 db = mongo_client.user
