@@ -34,24 +34,38 @@ async def start(event):
         })
     except:
         pass
-    keyboard = [
+    # keyboard = [
+    #     [
+    #         Button.inline(str(msg.read_msg('connect')), b'connect'),
+    #         Button.inline(str(msg.read_msg("create")), b"create"),
+    #     ],
+    #     [
+    #         Button.inline(msg.read_msg("show"), b"show"),
+    #         Button.inline(msg.read_msg("settings"), b"settings")
+    #     ],
+    #     [
+    #         Button.inline(msg.read_msg("buy coins"), b"buy coins"),
+    #         Button.inline(msg.read_msg("help"), b"help")
+    #     ],
+    #     [
+    #         Button.inline(msg.read_msg('menu'),b'menu')
+    #     ]
+    # ]
+    keyboard2 = [
         [
-            Button.inline(str(msg.read_msg('connect')), b'connect'),
-            Button.inline(str(msg.read_msg("create")), b"create"),
+            Button.inline(str(msg.read_msg('Advertiser_menu')), b'Advertiser_menu')
         ],
         [
-            Button.inline(msg.read_msg("show"), b"show"),
-            Button.inline(msg.read_msg("settings"), b"settings")
+            Button.inline(str(msg.read_msg('Ad_receiver_menu')), b'Ad_receiver_menu')
         ],
         [
-            Button.inline(msg.read_msg("buy coins"), b"buy coins"),
-            Button.inline(msg.read_msg("help"), b"help")
+            Button.inline(str(msg.read_msg('coin_management')), b'coin_management')
         ],
         [
-            Button.inline(msg.read_msg('menu'),b'menu')
-        ]
+            Button.inline(str(msg.read_msg('help')), b'help_in_home')
+        ],
     ]
-    await bot.send_message(user_id, msg.read_msg('Introduction'), buttons=keyboard)
+    await bot.send_message(user_id, msg.read_msg('Introduction'), buttons=keyboard2)
 
 
 @bot.on(events.NewMessage(pattern="code:*"))
@@ -155,17 +169,73 @@ async def ad_handler(event):
 
 @bot.on(events.CallbackQuery())
 async def handler(event):
+    user_id = event.original_update.user_id
     find = db.users.find_one({'_id': event.original_update.user_id})
     code_2 = find.get('code')
+    if event.data == b'Advertiser_menu':
+        Advertiser_menu_keyboard = [
+            [
+                Button.inline(str(msg.read_msg('create')), b'create_ad_in_Advertiser_menu')
+            ],
+            [
+                Button.inline(str(msg.read_msg('show_ad_in_Advertiser_menu')), b'show_ad_in_Advertiser_menu')
+            ],
+            [
+                Button.inline(str(msg.read_msg('reports')), b'Advertiser_reports')
+            ],
+            [
+                Button.inline(str(msg.read_msg('help')), b'help_in_Advertiser_menu')
+            ],
+            [
+                Button.inline(str(msg.read_msg('back')), b'back_in_Advertiser_menu')
+            ]
 
-    if event.data == b'connect':
-        user_id = event.original_update.user_id
+        ]
+        await bot.send_message(user_id,msg.read_msg('Advertiser_menu'),buttons=Advertiser_menu_keyboard)
+
+
+    elif event.data == b'Ad_receiver_menu':
+        Ad_receiver_menu_keyboard = [
+            [
+                Button.inline(str(msg.read_msg('connect')), b'connect')
+            ],
+            [
+                Button.inline(str(msg.read_msg('show_ad_in_Ad_receiver_menu')), b'show_ad_in_Ad_receiver_menu')
+            ],
+            [
+                Button.inline(str(msg.read_msg('reports')), b'Ad_receiver_menu_reports')
+            ],
+            [
+                Button.inline(str(msg.read_msg('help')), b'help_in_Ad_receiver_menu')
+            ],
+            [
+                Button.inline(str(msg.read_msg('back')), b'back_in_Ad_receiver_menu')
+            ],
+
+        ]
+        await bot.send_message(user_id,msg.read_msg('Ad_receiver_menu'),buttons=Ad_receiver_menu_keyboard)
+    elif event.data == b'coin_management':
+        coin_management_keyboard = [
+            [
+                Button.inline(str(msg.read_msg('buy_coins')), b'coin_management')
+            ],
+            [
+                Button.inline(str(msg.read_msg('reports')), b'coin_management_reports')
+            ],
+            [
+                Button.inline(str(msg.read_msg('help')), b'help_in_coin_management')
+            ],
+            [
+                Button.inline(str(msg.read_msg('back')), b'back_in_coin_management')
+            ],
+
+        ]
+        await bot.send_message(user_id,msg.read_msg('coin_management'),buttons=coin_management_keyboard)
+    elif event.data == b'connect':
         await bot.send_message(user_id,msg.read_msg('join'))
         await bot.send_message(user_id, msg.read_msg('code'))
         await bot.send_message(user_id, code_2)
-
-    elif event.data == b'create':
-        user_id = event.original_update.user_id
+    elif event.data == b'create_ad_in_Advertiser_menu':
         async with bot.conversation(user_id, timeout=1000) as conv:
             msg1 = await conv.send_message(msg.read_msg('ads_text'))
             text = await conv.get_response(timeout=1000)
@@ -186,7 +256,7 @@ async def handler(event):
             except:
                 pass
 
-    elif event.data == b'show':
+    elif event.data == b'show_ad_in_Advertiser_menu':
             user_id = event.original_update.user_id
             i = 1
             count = db.ads.count_documents(({"owner_id": user_id}))
@@ -217,14 +287,6 @@ async def handler(event):
                     await bot.send_message(user_id,msg.read_msg('not_admin'))
 
                 i = i + 1
-    elif event.data == b'menu' :
-        user_id = event.original_update.user_id
-        markup = event.client.build_reply_markup([
-            [Button.text('/start')],
-        ])
-        await event.respond(msg.read_msg('menu_Application'),buttons=markup)
-
-
 def main():
     """Start the bot."""
     bot.run_until_disconnected()

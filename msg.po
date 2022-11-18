@@ -1,11 +1,29 @@
+msgid 'Advertiser_menu'
+msgstr 'منوی تبلیغ دهنده'
+
+msgid 'reports'
+msgstr 'گزارشات'
+
+msgid 'back'
+msgstr 'بازگشت'
+
+msgid 'Ad_receiver_menu'
+msgstr 'منوی تبلیغ گیرنده'
+
+msgid 'show_ad_in_Ad_receiver_menu'
+msgstr 'مشاهده و ویرایش گروه یا کانال'
+
+msgid 'coin_management'
+msgstr 'مدیریت سکه'
+
 msgid 'connect'
-msgstr 'اتصال گروه / کانال'
+msgstr 'اتصال گروه یا کانال'
 
 msgid "create"
 msgstr "ایجاد تبلیغ جدید"
 
-msgid "show"
-msgstr "نمایش تبلیغات"
+msgid "show_ad_in_Advertiser_menu"
+msgstr "مشاهده و انتشار تبلیغات"
 
 msgid "settings"
 msgstr "مدیریت و تنظیمات"
@@ -13,7 +31,7 @@ msgstr "مدیریت و تنظیمات"
 msgid 'reason_Show_ad'
 msgstr 'Show_ad'
 
-msgid "buy coins"
+msgid "buy_coins"
 msgstr "خرید سکه"
 
 msgid 'help'
