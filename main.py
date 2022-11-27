@@ -236,6 +236,8 @@ async def handler(event):
         await bot.send_message(user_id, msg.read_msg('code'))
         await bot.send_message(user_id, code_2)
     elif event.data == b'create_ad_in_Advertiser_menu':
+        date = datetime.datetime.now()
+
         async with bot.conversation(user_id, timeout=1000) as conv:
             msg1 = await conv.send_message(msg.read_msg('ads_text'))
             text = await conv.get_response(timeout=1000)
@@ -250,7 +252,8 @@ async def handler(event):
                     "_id" : ads_id,
                     "text" : ads_text,
                     "link" : ads_link,
-                    "owner_id" : user_id
+                    "owner_id" : user_id,
+                    'date' : str(date),
                 })
                 await bot.send_message(user_id,msg.read_msg('The_ad_was_created_successfully'))
             except:
@@ -260,8 +263,17 @@ async def handler(event):
             user_id = event.original_update.user_id
             i = 1
             count = db.ads.count_documents(({"owner_id": user_id}))
-
             while i <= count:
+                if i == 6:
+                    keyboard_next_page = [
+                        [
+                            Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')), b'next_page_in_Advertiser_menu')
+                        ]
+                    ]
+                    await bot.send_message(user_id,msg.read_msg('next_page_in_Advertiser_menu'),buttons=keyboard_next_page)
+                    break
+                else:
+                    pass
                 count_2 = count - i
                 ads_id = str(user_id) + str("_") + str(count_2)
                 keyboard = [
@@ -269,22 +281,19 @@ async def handler(event):
                         Button.inline(msg.read_msg("select"), data=str.encode('ad:' + ads_id))
                     ]
                 ]
-                find = db.ads.find_one({
-                    '_id': ads_id
-                })
 
+                find_ads = db.ads.find_one({'_id': ads_id})
                 try:
-                    text = find.get('text')
-                    link = find.get('link')
+                    text = find_ads.get('text')
+                    link = find_ads.get('link')
                     if text is None:
                         text = msg.read_msg('text not found')
                     if link is None:
                         link = msg.read_msg('link not found')
                     perfect_ads = f"{text}\n{link}"
                     await bot.send_message(user_id, perfect_ads, buttons=keyboard)
-
-                except:
-                    await bot.send_message(user_id,msg.read_msg('not_admin'))
+                except Exception as e:
+                    print(e)
 
                 i = i + 1
 def main():

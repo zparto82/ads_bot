@@ -31,11 +31,23 @@ msgstr "مدیریت و تنظیمات"
 msgid 'reason_Show_ad'
 msgstr 'Show_ad'
 
+msgid 'next_page_in_Advertiser_menu'
+msgstr '< صفحه بعد'
+
 msgid "buy_coins"
 msgstr "خرید سکه"
 
 msgid 'help'
 msgstr 'راهنما'
+
+msgid 'ad_status_new'
+msgstr 'وضعیت : جدید'
+
+msgid 'ad_status_Showing'
+msgstr 'وضعیت : درحال نمایش'
+
+msgid 'Finish_the_show'
+msgstr 'وضعیت : اتمام نمایش'
 
 msgid 'code'
 msgstr 'این کد را یک بار درون کانال یا گروه خود ارسال کنید بعدا میتوانید آن را پاک کنید:'
