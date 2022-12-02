@@ -172,6 +172,7 @@ async def handler(event):
     user_id = event.original_update.user_id
     find = db.users.find_one({'_id': event.original_update.user_id})
     code_2 = find.get('code')
+    global keyboard
     if event.data == b'Advertiser_menu':
         Advertiser_menu_keyboard = [
             [
@@ -258,22 +259,12 @@ async def handler(event):
                 await bot.send_message(user_id,msg.read_msg('The_ad_was_created_successfully'))
             except:
                 pass
-
     elif event.data == b'show_ad_in_Advertiser_menu':
             user_id = event.original_update.user_id
             i = 1
+
             count = db.ads.count_documents(({"owner_id": user_id}))
             while i <= count:
-                if i == 6:
-                    keyboard_next_page = [
-                        [
-                            Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')), b'next_page_in_Advertiser_menu')
-                        ]
-                    ]
-                    await bot.send_message(user_id,msg.read_msg('next_page_in_Advertiser_menu'),buttons=keyboard_next_page)
-                    break
-                else:
-                    pass
                 count_2 = count - i
                 ads_id = str(user_id) + str("_") + str(count_2)
                 keyboard = [
@@ -281,7 +272,20 @@ async def handler(event):
                         Button.inline(msg.read_msg("select"), data=str.encode('ad:' + ads_id))
                     ]
                 ]
-
+                count_if = 0
+                if i == 6:
+                    count_if +=1
+                    print(count_if)
+                    keyboard_next_page = [
+                        [
+                            # nxn = next button number
+                            Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')), data=str.encode('nxn:' + str(count_if)))
+                        ]
+                    ]
+                    await bot.send_message(user_id,msg.read_msg('next_page_in_Advertiser_menu'),buttons=keyboard_next_page)
+                    break
+                else:
+                    pass
                 find_ads = db.ads.find_one({'_id': ads_id})
                 try:
                     text = find_ads.get('text')
@@ -294,8 +298,35 @@ async def handler(event):
                     await bot.send_message(user_id, perfect_ads, buttons=keyboard)
                 except Exception as e:
                     print(e)
-
                 i = i + 1
+
+@bot.on(events.CallbackQuery(pattern='nxn:*'))
+async def nxn_handler(event):
+    user_id = event.original_update.user_id
+    nxn_number = int(event.data.decode().split(':')[1])
+    print('nxn',nxn_number)
+    count_for = 0
+    if nxn_number == 1:
+        find = db.ads.find({'owner_id':user_id}).skip(5)
+        for ads in find:
+            count_for +=1
+            if count_for == 6:
+
+                break
+            count = db.ads.count_documents(({"owner_id": user_id}))
+            try:
+                text = ads.get('text')
+                link = ads.get('link')
+                if text is None:
+                    text = msg.read_msg('text not found')
+                if link is None:
+                    link = msg.read_msg('link not found')
+                perfect_ads = f"{text}\n{link}"
+                await bot.send_message(user_id, perfect_ads, buttons=keyboard)
+            except Exception as e:
+                print(e)
+    else:
+        pass
 def main():
     """Start the bot."""
     bot.run_until_disconnected()
