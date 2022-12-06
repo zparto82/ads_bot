@@ -1,3 +1,5 @@
+import pymongo
+
 import coins
 import config
 import code_creator
@@ -254,7 +256,7 @@ async def handler(event):
                     "text" : ads_text,
                     "link" : ads_link,
                     "owner_id" : user_id,
-                    'date' : str(date),
+                    'date': str(date),
                 })
                 await bot.send_message(user_id,msg.read_msg('The_ad_was_created_successfully'))
             except:
@@ -275,7 +277,7 @@ async def handler(event):
                 count_if = 0
                 if i == 6:
                     count_if +=1
-                    print(count_if)
+
                     keyboard_next_page = [
                         [
                             # nxn = next button number
@@ -303,30 +305,29 @@ async def handler(event):
 @bot.on(events.CallbackQuery(pattern='nxn:*'))
 async def nxn_handler(event):
     user_id = event.original_update.user_id
-    nxn_number = int(event.data.decode().split(':')[1])
-    print('nxn',nxn_number)
-    count_for = 0
-    if nxn_number == 1:
-        find = db.ads.find({'owner_id':user_id}).skip(5)
-        for ads in find:
-            count_for +=1
-            if count_for == 6:
+    nxn_number = int(event.data.decode().split(':')[1])+1
+    zarb = nxn_number * 5
+    find = db.ads.find({'owner_id':user_id}).sort('date',-1).skip(zarb)
+    keyboard_next_page = [
+        [
+            # nxn = next button number
+            Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')), data=str.encode('nxn:' + str(nxn_number)))
+        ]
+    ]
+    for i in find:
+        try:
+            text = i.get('text')
+            link = i.get('link')
+            if text is None:
+                text = msg.read_msg('text not found')
+            if link is None:
+                link = msg.read_msg('link not found')
+            perfect_ads = f"{text}\n{link}"
+            await bot.send_message(user_id, perfect_ads, buttons=keyboard)
+        except Exception as e:
+            print(e)
+    await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'), buttons=keyboard_next_page)
 
-                break
-            count = db.ads.count_documents(({"owner_id": user_id}))
-            try:
-                text = ads.get('text')
-                link = ads.get('link')
-                if text is None:
-                    text = msg.read_msg('text not found')
-                if link is None:
-                    link = msg.read_msg('link not found')
-                perfect_ads = f"{text}\n{link}"
-                await bot.send_message(user_id, perfect_ads, buttons=keyboard)
-            except Exception as e:
-                print(e)
-    else:
-        pass
 def main():
     """Start the bot."""
     bot.run_until_disconnected()
