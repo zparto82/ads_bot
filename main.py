@@ -307,14 +307,18 @@ async def nxn_handler(event):
     user_id = event.original_update.user_id
     nxn_number = int(event.data.decode().split(':')[1])+1
     zarb = nxn_number * 5
-    find = db.ads.find({'owner_id':user_id}).sort('date',-1).skip(zarb)
+    taghsim = zarb//5
+
+    find = db.ads.find({'owner_id':user_id}).sort('date',-1).skip(zarb).limit(5)
     keyboard_next_page = [
         [
             # nxn = next button number
             Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')), data=str.encode('nxn:' + str(nxn_number)))
         ]
     ]
+    count_for = 0
     for i in find:
+        count_for +=1
         try:
             text = i.get('text')
             link = i.get('link')
@@ -326,8 +330,12 @@ async def nxn_handler(event):
             await bot.send_message(user_id, perfect_ads, buttons=keyboard)
         except Exception as e:
             print(e)
-    await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'), buttons=keyboard_next_page)
-
+        print('c',count_for)
+        if count_for == 5:
+            count_for = 0
+            await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'), buttons=keyboard_next_page)
+        else:
+            pass
 def main():
     """Start the bot."""
     bot.run_until_disconnected()
