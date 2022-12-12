@@ -1,4 +1,3 @@
-import pymongo
 
 import coins
 import config
@@ -20,8 +19,13 @@ else:
 bot.start(bot_token=bot_token)
 mongo_client = MongoClient('127.0.0.1:27017')
 db = mongo_client.user
-
-
+try:
+    ad_pending = db.ad_pending.insert_one({
+        'id': 'one_pending',
+        'msg':'hello'
+    })
+except:
+    pass
 @bot.on(events.NewMessage(pattern="/start"))
 async def start(event):
     user_id = event.message.peer_id.user_id
@@ -264,6 +268,7 @@ async def handler(event):
     elif event.data == b'show_ad_in_Advertiser_menu':
             user_id = event.original_update.user_id
             i = 1
+            global ok
 
             count = db.ads.count_documents(({"owner_id": user_id}))
             while i <= count:
@@ -290,16 +295,55 @@ async def handler(event):
                     pass
                 find_ads = db.ads.find_one({'_id': ads_id})
                 try:
-                    text = find_ads.get('text')
-                    link = find_ads.get('link')
-                    if text is None:
-                        text = msg.read_msg('text not found')
-                    if link is None:
-                        link = msg.read_msg('link not found')
-                    perfect_ads = f"{text}\n{link}"
-                    await bot.send_message(user_id, perfect_ads, buttons=keyboard)
-                except Exception as e:
-                    print(e)
+                    new = db.ad_pending.find_one({'_id':ads_id})
+                except:
+
+                    print('except_in_new')
+                    ok = 1
+
+                try:
+                    showing = db.ad_pending.find_one({'_id':ads_id,'Number_of_coins':{'$gt':0}})
+
+                    print('except_in_new')
+                    ok = 2
+                except:
+                    pass
+                try:
+                    finish = db.ad_pending.find_one({'_id': ads_id, 'Number_of_coins': {'$eq': 0}})
+                    print('shod')
+                    status = 'Finish_the_show'
+                    print('except_in_new')
+                    ok = 3
+                except:
+                    pass
+                if ok == 1:
+                    try:
+                        text = find_ads.get('text')
+                        link = find_ads.get('link')
+                        perfect_ads = f"{text}\n{link}\n{msg.read_msg('ad_status_new')}"
+                        await bot.send_message(user_id, perfect_ads, buttons=keyboard)
+                    except Exception as e:
+                        print(e)
+                elif ok == 2:
+                    try:
+                        text = find_ads.get('text')
+                        link = find_ads.get('link')
+                        perfect_ads = f"{text}\n{link}\n{msg.read_msg('ad_status_Showing')}"
+                        await bot.send_message(user_id, perfect_ads, buttons=keyboard)
+                    except Exception as e:
+                        print(e)
+                elif ok == 3:
+                    try:
+                        text = find_ads.get('text')
+                        link = find_ads.get('link')
+                        perfect_ads = f"{text}\n{link}\n{msg.read_msg('Finish_the_show')}"
+                        await bot.send_message(user_id, perfect_ads, buttons=keyboard)
+                    except Exception as e:
+                        print(e)
+                else:
+                    print('bad shod')
+                print(ok)
+
                 i = i + 1
 
 @bot.on(events.CallbackQuery(pattern='nxn:*'))
