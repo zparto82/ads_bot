@@ -7,6 +7,9 @@ msgstr 'گزارشات'
 msgid 'back'
 msgstr 'بازگشت'
 
+msgid 'delete'
+msgstr 'حذف'
+
 msgid 'Ad_receiver_menu'
 msgstr 'منوی تبلیغ گیرنده'
 
@@ -49,6 +52,12 @@ msgstr 'وضعیت : درحال نمایش'
 msgid 'Finish_the_show'
 msgstr 'وضعیت : اتمام نمایش'
 
+msgid 'add_coin'
+msgstr 'افزودن سکه'
+
+msgid 'Stop_the_show'
+msgstr 'توقف نمایش'
+
 msgid 'code'
 msgstr 'این کد را یک بار درون کانال یا گروه خود ارسال کنید بعدا میتوانید آن را پاک کنید:'
 
@@ -63,8 +72,13 @@ msgstr '🔵لطفا این کد را در کانال/گروه خود ارسال
 msgid 'text not found'
 msgstr '🔴متنی ثبت نشده❗️'
 
-msgid 'select'
-msgstr 'انتخاب🔴'
+msgid 'edit'
+msgstr 'ویرایش'
+
+msgid 'release_new'
+msgstr 'انتشار'
+msgid 'release_finish_show'
+msgstr 'انتشار مجدد'
 msgid 'not_admin'
 msgstr '🔴شما یا مارا در گروه و کانال خود اضافه نکردید یا ما را به عنوان ادمین اضافه نکردید❗️'
 msgid 'link not found'

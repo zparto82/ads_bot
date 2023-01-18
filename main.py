@@ -19,13 +19,7 @@ else:
 bot.start(bot_token=bot_token)
 mongo_client = MongoClient('127.0.0.1:27017')
 db = mongo_client.user
-try:
-    ad_pending = db.ad_pending.insert_one({
-        'id': 'one_pending',
-        'msg':'hello'
-    })
-except:
-    pass
+
 @bot.on(events.NewMessage(pattern="/start"))
 async def start(event):
     user_id = event.message.peer_id.user_id
@@ -178,7 +172,7 @@ async def handler(event):
     user_id = event.original_update.user_id
     find = db.users.find_one({'_id': event.original_update.user_id})
     code_2 = find.get('code')
-    global keyboard
+
     if event.data == b'Advertiser_menu':
         Advertiser_menu_keyboard = [
             [
@@ -268,17 +262,13 @@ async def handler(event):
     elif event.data == b'show_ad_in_Advertiser_menu':
             user_id = event.original_update.user_id
             i = 1
-            global ok
 
             count = db.ads.count_documents(({"owner_id": user_id}))
             while i <= count:
+
                 count_2 = count - i
                 ads_id = str(user_id) + str("_") + str(count_2)
-                keyboard = [
-                    [
-                        Button.inline(msg.read_msg("select"), data=str.encode('ad:' + ads_id))
-                    ]
-                ]
+
                 count_if = 0
                 if i == 6:
                     count_if +=1
@@ -295,54 +285,81 @@ async def handler(event):
                     pass
                 find_ads = db.ads.find_one({'_id': ads_id})
                 try:
-                    new = db.ad_pending.find_one({'_id':ads_id})
-                except:
+                    find_pending = db.ad_pending.find_one({'ad_id':ads_id})
+                    if find_pending is None:
+                        status_new = 'ad_status_new'
+                        keyboard_new = [
+                            [
+                                Button.inline(msg.read_msg("release_new"), data=str.encode('ad:' + ads_id)),
+                                Button.inline(msg.read_msg("edit"), data=b'edit'),
+                                Button.inline(msg.read_msg("delete"), data=b'delete')
+                            ]
+                        ]
 
-                    print('except_in_new')
-                    ok = 1
+                        try:
+                            text = find_ads.get('text')
+                            link = find_ads.get('link')
+                            perfect_ads = f"{text}\n{link}\n{msg.read_msg(status_new)}"
+                            await bot.send_message(user_id, perfect_ads, buttons=keyboard_new)
+                        except Exception as e:
+                            print('e new',e)
+                    elif find_pending is not None:
+                        showing = db.ad_pending.find({'ad_id':ads_id,'Number_of_coins': {'$gt': 0}})
+                        show = 0
+                        for index in showing:
+                            print('index')
+                            print(show)
+                            show +=1
+                        if show == 0:
+                            status_finish = 'Finish_the_show'
+                            keyboard_finish = [
+                                [
+                                    Button.inline(msg.read_msg("release_finish_show"), data=str.encode('ad:' + ads_id)),
+                                    Button.inline(msg.read_msg("edit"), data=b'edit'),
+                                    Button.inline(msg.read_msg("delete"), data=b'delete'),
+                                    Button.inline(msg.read_msg("reports"), data=b'reports')
+                                ],
+                            ]
 
-                try:
-                    showing = db.ad_pending.find_one({'_id':ads_id,'Number_of_coins':{'$gt':0}})
+                            try:
 
-                    print('except_in_new')
-                    ok = 2
+                                text = find_ads.get('text')
+                                link = find_ads.get('link')
+                                perfect_ads = f"{text}\n{link}\n{msg.read_msg(status_finish)}"
+                                await bot.send_message(user_id, perfect_ads, buttons=keyboard_finish)
+                            except Exception as e:
+                                print(e)
+                        else:
+                            status_show = 'ad_status_Showing'
+
+                            keyboard_show = [
+                                [
+                                    Button.inline(msg.read_msg("add_coin"), data=str.encode('ad:' + ads_id)),
+                                    Button.inline(msg.read_msg("edit"), data=b'edit'),
+                                    Button.inline(msg.read_msg("Stop_the_show"), data=b'stop_show'),
+                                    Button.inline(msg.read_msg("reports"), data=b'reports'),
+                                ]
+                            ]
+
+
+                            try:
+                                text = find_ads.get('text')
+
+                                link = find_ads.get('link')
+
+                                perfect_ads = f"{text}\n{link}\n{msg.read_msg(status_show)}"
+                                print(type(perfect_ads))
+                                print('ok')
+                                await bot.send_message(user_id, perfect_ads,buttons=keyboard_show)
+
+                            except Exception as e:
+
+                                print('e',e)
+                    else:
+                        pass
+
                 except:
                     pass
-                try:
-                    finish = db.ad_pending.find_one({'_id': ads_id, 'Number_of_coins': {'$eq': 0}})
-                    print('shod')
-                    status = 'Finish_the_show'
-                    print('except_in_new')
-                    ok = 3
-                except:
-                    pass
-                if ok == 1:
-                    try:
-                        text = find_ads.get('text')
-                        link = find_ads.get('link')
-                        perfect_ads = f"{text}\n{link}\n{msg.read_msg('ad_status_new')}"
-                        await bot.send_message(user_id, perfect_ads, buttons=keyboard)
-                    except Exception as e:
-                        print(e)
-                elif ok == 2:
-                    try:
-                        text = find_ads.get('text')
-                        link = find_ads.get('link')
-                        perfect_ads = f"{text}\n{link}\n{msg.read_msg('ad_status_Showing')}"
-                        await bot.send_message(user_id, perfect_ads, buttons=keyboard)
-                    except Exception as e:
-                        print(e)
-                elif ok == 3:
-                    try:
-                        text = find_ads.get('text')
-                        link = find_ads.get('link')
-                        perfect_ads = f"{text}\n{link}\n{msg.read_msg('Finish_the_show')}"
-                        await bot.send_message(user_id, perfect_ads, buttons=keyboard)
-                    except Exception as e:
-                        print(e)
-                else:
-                    print('bad shod')
-                print(ok)
 
                 i = i + 1
 
@@ -363,18 +380,94 @@ async def nxn_handler(event):
     count_for = 0
     for i in find:
         count_for +=1
+        ads_id = i.get('_id')
         try:
-            text = i.get('text')
-            link = i.get('link')
-            if text is None:
-                text = msg.read_msg('text not found')
-            if link is None:
-                link = msg.read_msg('link not found')
-            perfect_ads = f"{text}\n{link}"
-            await bot.send_message(user_id, perfect_ads, buttons=keyboard)
-        except Exception as e:
-            print(e)
-        print('c',count_for)
+            find_pending = db.ad_pending.find_one({'ad_id': ads_id})
+            if find_pending is None:
+                status_new = 'ad_status_new'
+                keyboard_new = [
+                    [
+                        Button.inline(msg.read_msg("release_new"), data=str.encode('ad:' + ads_id)),
+                        Button.inline(msg.read_msg("edit"), data=b'edit'),
+                        Button.inline(msg.read_msg("delete"), data=b'delete')
+                    ]
+                ]
+
+                try:
+                    text = i.get('text')
+                    link = i.get('link')
+                    perfect_ads = f"{text}\n{link}\n{msg.read_msg(status_new)}"
+                    await bot.send_message(user_id, perfect_ads, buttons=keyboard_new)
+                except Exception as e:
+                    print('e new', e)
+            elif find_pending is not None:
+                showing = db.ad_pending.find({'ad_id': ads_id, 'Number_of_coins': {'$gt': 0}})
+                show = 0
+                for index in showing:
+                    print('index')
+                    print(show)
+                    show += 1
+                if show == 0:
+                    status_finish = 'Finish_the_show'
+                    keyboard_finish = [
+                        [
+                            Button.inline(msg.read_msg("release_finish_show"), data=str.encode('ad:' + ads_id)),
+                            Button.inline(msg.read_msg("edit"), data=b'edit'),
+                            Button.inline(msg.read_msg("delete"), data=b'delete'),
+                            Button.inline(msg.read_msg("reports"), data=b'reports')
+                        ],
+                    ]
+
+                    try:
+
+                        text = i.get('text')
+                        link = i.get('link')
+                        perfect_ads = f"{text}\n{link}\n{msg.read_msg(status_finish)}"
+                        await bot.send_message(user_id, perfect_ads, buttons=keyboard_finish)
+                    except Exception as e:
+                        print(e)
+                else:
+                    status_show = 'ad_status_Showing'
+
+                    keyboard_show = [
+                        [
+                            Button.inline(msg.read_msg("add_coin"), data=str.encode('ad:' + ads_id)),
+                            Button.inline(msg.read_msg("edit"), data=b'edit'),
+                            Button.inline(msg.read_msg("Stop_the_show"), data=b'stop_show'),
+                            Button.inline(msg.read_msg("reports"), data=b'reports'),
+                        ]
+                    ]
+
+                    try:
+                        text = i.get('text')
+
+                        link = i.get('link')
+
+                        perfect_ads = f"{text}\n{link}\n{msg.read_msg(status_show)}"
+                        print(type(perfect_ads))
+                        print('ok')
+                        await bot.send_message(user_id, perfect_ads, buttons=keyboard_show)
+
+                    except Exception as e:
+
+                        print('e', e)
+            else:
+                pass
+
+        except:
+            pass
+
+        # try:
+        #     text = i.get('text')
+        #     link = i.get('link')
+        #     if text is None:
+        #         text = msg.read_msg('text not found')
+        #     if link is None:
+        #         link = msg.read_msg('link not found')
+        #     perfect_ads = f"{text}\n{link}"
+        #     await bot.send_message(user_id, perfect_ads, buttons=keyboard)
+        # except Exception as e:
+        #     print(e)
         if count_for == 5:
             count_for = 0
             await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'), buttons=keyboard_next_page)
