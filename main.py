@@ -13,7 +13,7 @@ api_id = 86576
 api_hash = '385886b58b21b7f3762e1cde2d651925'
 bot_token = config.read("telegram", "bot_token")
 if config.read('telegram', 'proxy') == 'True':
-    bot = TelegramClient('bot', api_id, api_hash, proxy=('socks5', '127.0.0.1', 1080))
+    bot = TelegramClient('bot', api_id, api_hash, proxy=('socks5', '127.0.0.1', 1082))
 else:
     bot = TelegramClient('bot', api_id, api_hash)
 bot.start(bot_token=bot_token)
@@ -34,23 +34,7 @@ async def start(event):
         })
     except:
         pass
-    # keyboard = [
-    #     [
-    #         Button.inline(str(msg.read_msg('connect')), b'connect'),
-    #         Button.inline(str(msg.read_msg("create")), b"create"),
-    #     ],
-    #     [
-    #         Button.inline(msg.read_msg("show"), b"show"),
-    #         Button.inline(msg.read_msg("settings"), b"settings")
-    #     ],
-    #     [
-    #         Button.inline(msg.read_msg("buy coins"), b"buy coins"),
-    #         Button.inline(msg.read_msg("help"), b"help")
-    #     ],
-    #     [
-    #         Button.inline(msg.read_msg('menu'),b'menu')
-    #     ]
-    # ]
+
     keyboard2 = [
         [
             Button.inline(str(msg.read_msg('Advertiser_menu')), b'Advertiser_menu')
@@ -116,7 +100,7 @@ async def code(event):
                 'type': chat_type,
                 'join_date': join_date,
                 'members': chat_members,
-                'status': 'active',
+                'status': msg.read_msg('channel_active'),
                 'info': chat_info
             })
             await bot.send_message(peer_id, msg.read_msg("Channel_added_successfully"))
@@ -152,7 +136,7 @@ async def ad_handler(event):
 
             # log coin change
             change_date = datetime.datetime.now()
-            log_coin_change = coins.coin(user_id,-pending_coin,msg.read_msg('reason'),change_date,db)
+            log_coin_change = coins.coin(user_id,-pending_coin,msg.read_msg('reason_Advertising_order'),change_date,db)
 
             # insert into ad_pending
             try:
@@ -169,7 +153,9 @@ async def ad_handler(event):
 
 @bot.on(events.CallbackQuery())
 async def handler(event):
+
     user_id = event.original_update.user_id
+
     find = db.users.find_one({'_id': event.original_update.user_id})
     code_2 = find.get('code')
 
@@ -218,7 +204,7 @@ async def handler(event):
     elif event.data == b'coin_management':
         coin_management_keyboard = [
             [
-                Button.inline(str(msg.read_msg('buy_coins')), b'coin_management')
+                Button.inline(str(msg.read_msg('buy_coins')), b'buy_coins')
             ],
             [
                 Button.inline(str(msg.read_msg('reports')), b'coin_management_reports')
@@ -307,8 +293,7 @@ async def handler(event):
                         showing = db.ad_pending.find({'ad_id':ads_id,'Number_of_coins': {'$gt': 0}})
                         show = 0
                         for index in showing:
-                            print('index')
-                            print(show)
+
                             show +=1
                         if show == 0:
                             status_finish = 'Finish_the_show'
@@ -348,8 +333,8 @@ async def handler(event):
                                 link = find_ads.get('link')
 
                                 perfect_ads = f"{text}\n{link}\n{msg.read_msg(status_show)}"
-                                print(type(perfect_ads))
-                                print('ok')
+
+
                                 await bot.send_message(user_id, perfect_ads,buttons=keyboard_show)
 
                             except Exception as e:
@@ -362,15 +347,152 @@ async def handler(event):
                     pass
 
                 i = i + 1
+    elif event.data == b'show_ad_in_Ad_receiver_menu':
+        try:
+
+            await bot.send_message(user_id,msg.read_msg('welcome_show_channel'))
+            find_connection = db.connections.find({'owner': user_id}).limit(5).sort('members',-1)
+            if find_connection is None:
+                await bot.send_message(user_id, msg.read_msg('channel_not_created'))
+            else:
+                pass
+
+            for index,channel in enumerate(find_connection):
+                channel_title = channel.get('title')
+                channel_members = channel.get('members')
+                channel_status = channel.get('status')
+
+                full_channel = f'{msg.read_msg("channel_title")}:{channel_title}\n{msg.read_msg("channel_member")}:{channel_members}\n{msg.read_msg("channel_status")}:{channel_status}'
+                await bot.send_message(user_id, full_channel)
+                count_for = 0
+                if index == 4:
+                    count_for +=1
+                    keyboard_next_page = [
+                        [
+                            # ncn = next channel number
+                            Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')), data=str.encode('ncn:' + str(count_for)))
+                        ]
+                    ]
+                    await bot.send_message(user_id,msg.read_msg('next_page_in_Advertiser_menu'),buttons=keyboard_next_page)
+                    break
+                else:
+                    pass
+        except Exception() as e:
+            print(e)
+
+    elif event.data == b'buy_coins':
+        help_buy_coin = msg.read_msg('Guide_to_buying_coins')
+        await bot.send_message(user_id,help_buy_coin.replace('$','\n'))
+    elif event.data == b'coin_management_reports':
+        await bot.send_message(user_id, msg.read_msg('welcome_show_coins'))
+        coin_find = db.coins.find({'user' : user_id}).sort('change_date',-1).limit(5)
+        for index,coin in enumerate(coin_find):
+            coin_change = coin.get('coin_change')
+            reason = coin.get('reason')
+            coin_date = coin.get('change_date')
+            coin_report = f'{msg.read_msg("coin_change")}:{coin_change}\n{msg.read_msg("reason_coin")}:{reason}\n{msg.read_msg("coin_date")}:{coin_date}'
+            await bot.send_message(user_id,coin_report)
+            count_if_coin = 0
+            if index == 4:
+                count_if_coin += 1
+                keyboard_next_page_coin = [
+                    [
+                        # nsn = next score number
+                        Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),
+                                      data=str.encode('nsn:' + str(count_if_coin)))
+                    ]
+                ]
+                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),
+                                       buttons=keyboard_next_page_coin)
+                break
+            else:
+                pass
+@bot.on(events.CallbackQuery(pattern='nsn:*'))
+async def nsn_handler(event):
+    user_id = event.original_update.user_id
+    nsn_number = int(event.data.decode().split(':')[1])+1
+    skip_number = (nsn_number * 5)-5
+    try:
+        keyboard_next_page = [
+            [
+                # nsn = next channel number
+                Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),
+                              data=str.encode('nsn:' + str(nsn_number)))
+            ]
+        ]
+
+        find = db.coins.find({'user': user_id}).sort('change_date', -1).skip(skip_number).limit(5)
+        if find is None:
+            await bot.send_message(user_id, msg.read_msg('coin_not_changed'))
+        else:
+            pass
+        count = 0
+        for coin in find:
+            count +=1
+            coin_change = coin.get('coin_change')
+            reason = coin.get('reason')
+            coin_date = coin.get('change_date')
+            coin_report = f'{msg.read_msg("coin_change")}:{coin_change}\n{msg.read_msg("reason_coin")}:{reason}\n{msg.read_msg("coin_date")}:{coin_date}'
+            await bot.send_message(user_id,coin_report)
+            if count == 5:
+                count = 0
+
+                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),
+                                       buttons=keyboard_next_page)
+            else:
+                pass
+    except Exception() as error:
+        print('error',error)
+
+
+@bot.on(events.CallbackQuery(pattern='ncn:*'))
+async def ncn_handler(event):
+    user_id = event.original_update.user_id
+    ncn_number = int(event.data.decode().split(':')[1])+1
+    skip_number = (ncn_number * 5)-5
+    try:
+        keyboard_next_page = [
+            [
+                # ncn = next channel number
+                Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),
+                              data=str.encode('ncn:' + str(ncn_number)))
+            ]
+        ]
+        await bot.send_message(user_id, msg.read_msg('welcome_show_channel'))
+        find = db.connections.find({'owner': user_id}).sort('members', -1).skip(skip_number).limit(5)
+        if find is None:
+            await bot.send_message(user_id, msg.read_msg('channel_not_created'))
+        else:
+            pass
+        count = 0
+        for channel in find:
+            count +=1
+            channel_title = channel.get('title')
+            channel_members = channel.get('members')
+            channel_status = channel.get('status')
+            if channel_status == 'active':
+                channel_status = msg.read_msg('channel_active')
+            else:
+                channel_status = msg.read_msg('channel_inactive')
+            full_channel = f'{msg.read_msg("channel_title")}:{channel_title}\n{msg.read_msg("channel_member")}:{channel_members}\n{msg.read_msg("channel_status")}:{channel_status}'
+            await bot.send_message(user_id, full_channel)
+            if count == 5:
+                count = 0
+
+                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),
+                                       buttons=keyboard_next_page)
+            else:
+                pass
+    except Exception() as error:
+        print('error',error)
+
 
 @bot.on(events.CallbackQuery(pattern='nxn:*'))
 async def nxn_handler(event):
     user_id = event.original_update.user_id
     nxn_number = int(event.data.decode().split(':')[1])+1
-    zarb = nxn_number * 5
-    taghsim = zarb//5
-
-    find = db.ads.find({'owner_id':user_id}).sort('date',-1).skip(zarb).limit(5)
+    skip_number = (nxn_number * 5)-5
+    find = db.ads.find({'owner_id':user_id}).sort('date',-1).skip(skip_number).limit(5)
     keyboard_next_page = [
         [
             # nxn = next button number
@@ -404,8 +526,6 @@ async def nxn_handler(event):
                 showing = db.ad_pending.find({'ad_id': ads_id, 'Number_of_coins': {'$gt': 0}})
                 show = 0
                 for index in showing:
-                    print('index')
-                    print(show)
                     show += 1
                 if show == 0:
                     status_finish = 'Finish_the_show'
@@ -444,12 +564,9 @@ async def nxn_handler(event):
                         link = i.get('link')
 
                         perfect_ads = f"{text}\n{link}\n{msg.read_msg(status_show)}"
-                        print(type(perfect_ads))
-                        print('ok')
                         await bot.send_message(user_id, perfect_ads, buttons=keyboard_show)
 
                     except Exception as e:
-
                         print('e', e)
             else:
                 pass
@@ -457,17 +574,7 @@ async def nxn_handler(event):
         except:
             pass
 
-        # try:
-        #     text = i.get('text')
-        #     link = i.get('link')
-        #     if text is None:
-        #         text = msg.read_msg('text not found')
-        #     if link is None:
-        #         link = msg.read_msg('link not found')
-        #     perfect_ads = f"{text}\n{link}"
-        #     await bot.send_message(user_id, perfect_ads, buttons=keyboard)
-        # except Exception as e:
-        #     print(e)
+
         if count_for == 5:
             count_for = 0
             await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'), buttons=keyboard_next_page)

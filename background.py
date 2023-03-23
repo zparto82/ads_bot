@@ -10,7 +10,7 @@ api_id = 86576
 api_hash = '385886b58b21b7f3762e1cde2d651925'
 bot_token = config.read("telegram", "bot_token")
 if config.read('telegram', 'proxy') == 'True':
-    client = TelegramClient('bot_background', api_id, api_hash, proxy=('socks5', '127.0.0.1', 1080))
+    client = TelegramClient('bot_background', api_id, api_hash, proxy=('socks5', '127.0.0.1', 1082))
 else:
     client = TelegramClient('bot_background', api_id, api_hash)
 client.start(bot_token=bot_token)
@@ -43,34 +43,34 @@ for index, group in enumerate(find_connections):
         continue
     try:
         filter_24h = db.ad_connection.find({'connection_id': channel_id}).sort('start_date', -1).limit(1)
+
         start_date = 0
         for ad_24h in filter_24h:
             start_date = ad_24h.get('start_date')
         if date_time - start_date < datetime.timedelta(days=1):
             continue
-    except:
-        pass
+    except Exception as er:
+        print(er)
     try:
         send_ads_in_back = send_ads.send_ads(text, link, channel_id, client)
         post_id = send_ads_in_back.id
+        # ad_pending --
+        number_of_coin = number_of_coin - members
+        update = db.ad_pending.update_one({'_id': real_id}, {'$set': {'Number_of_coins': number_of_coin}})
+        # owner_connections ++
+        update_user_coin = db.users.update_one({'_id': owner_id}, {'$inc': {'coin': members}})
+        # log coins collection
+        log_coin_change = coins.coin(owner_id, members, msg.read_msg('reason_Show_ad'), date_time, db)
+        ad_connection = db.ad_connection.insert_one({
+            "ad_id": ad_id,
+            "post_id": post_id,
+            "connection_id": channel_id,
+            "start_date": date_time,
+        })
+
     except Exception as error:
         print(error)
-        continue
 
-    # ad_pending --
-    number_of_coin = number_of_coin - members
-    print(number_of_coin, members)
-    update = db.ad_pending.update_one({'_id': real_id}, {'$set': {'Number_of_coins': number_of_coin}})
-    # owner_connections ++
-    update_user_coin = db.users.update_one({'_id': owner_id}, {'$inc': {'coin': members}})
-    # log coins collection
-    log_coin_change = coins.coin(owner_id, members, msg.read_msg('reason_Show_ad'), date_time, db)
-    ad_connection = db.ad_connection.insert_one({
-        "ad_id": ad_id,
-        "post_id": post_id,
-        "connection_id": channel_id,
-        "start_date": date_time,
-    })
 
 mongo_client.close()
 

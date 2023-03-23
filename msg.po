@@ -1,8 +1,15 @@
 msgid 'Advertiser_menu'
 msgstr 'منوی تبلیغ دهنده'
 
+msgid 'welcome_show_channel'
+msgstr 'کانال و گروه های متصل شده شما'
+
 msgid 'reports'
 msgstr 'گزارشات'
+
+
+
+
 
 msgid 'back'
 msgstr 'بازگشت'
@@ -10,11 +17,38 @@ msgstr 'بازگشت'
 msgid 'delete'
 msgstr 'حذف'
 
+msgid 'channel_not_created'
+msgstr 'شما کانال یا گروهی ایجاد نکرده اید❗'
+
 msgid 'Ad_receiver_menu'
 msgstr 'منوی تبلیغ گیرنده'
 
 msgid 'show_ad_in_Ad_receiver_menu'
 msgstr 'مشاهده و ویرایش گروه یا کانال'
+
+msgid 'coin_change'
+msgstr 'مقدار تغییر سکه'
+
+msgid 'coin_date'
+msgstr 'تاریخ'
+
+msgid 'channel_member'
+msgstr 'امتیاز(تعداد ممبر)'
+
+msgid 'channel_title'
+msgstr 'نام'
+
+msgid 'channel_status'
+msgstr 'وضعیت'
+
+msgid 'channel_active'
+msgstr 'فعال'
+
+msgid 'channel_inactive'
+msgstr 'غیر فعال'
+
+msgid 'reason_coin'
+msgstr 'دلیل'
 
 msgid 'coin_management'
 msgstr 'مدیریت سکه'
@@ -32,7 +66,13 @@ msgid "settings"
 msgstr "مدیریت و تنظیمات"
 
 msgid 'reason_Show_ad'
-msgstr 'Show_ad'
+msgstr 'نمایش تبلیغ'
+
+msgid 'coin_not_changed'
+msgstr 'تغییری در سکه وجود ندارد❗'
+
+msgid 'welcome_show_coins'
+msgstr 'تغییرات سکه👇'
 
 msgid 'next_page_in_Advertiser_menu'
 msgstr '< صفحه بعد'
@@ -97,7 +137,7 @@ msgid 'menu'
 msgstr '🔺منو🔻'
 
 msgid 'reason_Advertising_order'
-msgstr 'Advertising_order'
+msgstr 'سفارش تبلیغات'
 
 msgid "don't_have_enough_coins"
 msgstr "شما سکه کافی ندارید❗️"
@@ -121,3 +161,6 @@ msgstr "کانال با موفقیت اضافه شد✅"
 
 msgid "This_channel/group_has_already_been_added"
 msgstr "این کانال/گروه قبلا اضافه شده❗️"
+
+msgid 'Guide_to_buying_coins'
+msgstr 'راهنمای خرید سکه به صورت کارت به کارت $ ابتدا یکی از بسته ها را انتخاب کرده و هزینه آن بسته را به شماره کارت 6037997510127278 به نام زهرا قیوم زاده واریز کرده و سپس عکس رسید را به آیدی : sp_ads_world@ ارسال کرده تا حساب شما به همان مقدار شارژ شود $ بسته های موجود با تخفیف : $ 500,000 سکه 50,000 تومان $ 1,000,000 سکه 95,000 تومان $ 2,000,000 سکه 185,000 تومان $ 5,000,000 سکه 365,000 تومان'
