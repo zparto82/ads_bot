@@ -66,6 +66,9 @@ msgid "settings"
 msgstr "مدیریت و تنظیمات"
 
 msgid 'reason_Show_ad'
+msgstr 'show_ad'
+
+msgid 'reason_Show_ad_fa'
 msgstr 'نمایش تبلیغ'
 
 msgid 'coin_not_changed'
@@ -137,6 +140,9 @@ msgid 'menu'
 msgstr '🔺منو🔻'
 
 msgid 'reason_Advertising_order'
+msgstr 'Advertising_order'
+
+msgid 'reason_Advertising_order_fa'
 msgstr 'سفارش تبلیغات'
 
 msgid "don't_have_enough_coins"

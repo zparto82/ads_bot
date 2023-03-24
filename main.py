@@ -390,6 +390,10 @@ async def handler(event):
             coin_change = coin.get('coin_change')
             reason = coin.get('reason')
             coin_date = coin.get('change_date')
+            if reason == msg.read_msg('reason_Advertising_order'):
+                reason = msg.read_msg('reason_Advertising_order_fa')
+            elif reason == msg.read_msg('reason_Show_ad') :
+                reason = msg.read_msg('reason_Show_ad_fa')
             coin_report = f'{msg.read_msg("coin_change")}:{coin_change}\n{msg.read_msg("reason_coin")}:{reason}\n{msg.read_msg("coin_date")}:{coin_date}'
             await bot.send_message(user_id,coin_report)
             count_if_coin = 0
@@ -407,6 +411,7 @@ async def handler(event):
                 break
             else:
                 pass
+
 @bot.on(events.CallbackQuery(pattern='nsn:*'))
 async def nsn_handler(event):
     user_id = event.original_update.user_id
