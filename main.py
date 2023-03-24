@@ -9,8 +9,7 @@ from pymongo import MongoClient
 from telethon.sync import TelegramClient, events
 from telethon import Button
 from telethon.tl.functions.channels import GetFullChannelRequest
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CallbackQueryHandler
+
 api_id = 86576
 api_hash = '385886b58b21b7f3762e1cde2d651925'
 bot_token = config.read("telegram", "bot_token")
