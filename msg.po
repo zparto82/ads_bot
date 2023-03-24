@@ -12,7 +12,7 @@ msgstr 'گزارشات'
 
 
 msgid 'back'
-msgstr 'بازگشت'
+msgstr 'بازگشت به منوی اصلی'
 
 msgid 'delete'
 msgstr 'حذف'
