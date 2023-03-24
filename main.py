@@ -442,6 +442,74 @@ async def handler(event):
                 break
             else:
                 pass
+    elif event.data == b'Ad_receiver_menu_reports':
+        find_log = db.coins.find({'user':user_id,'reason':msg.read_msg('reason_Show_ad')}).sort('change_date',-1).limit(5)
+        if find_log is None:
+            await bot.send_message(user_id, msg.read_msg('coin_not_changed'))
+        else:
+            pass
+        for index,log in enumerate(find_log):
+            coin_change = log.get('coin_change')
+            reason = log.get('reason')
+            coin_date = log.get('change_date')
+            if reason == msg.read_msg('reason_Advertising_order'):
+                reason = msg.read_msg('reason_Advertising_order_fa')
+            elif reason == msg.read_msg('reason_Show_ad') :
+                reason = msg.read_msg('reason_Show_ad_fa')
+            coin_report = f'{msg.read_msg("coin_change")}:{coin_change}\n{msg.read_msg("reason_coin")}:{reason}\n{msg.read_msg("coin_date")}:{coin_date}'
+            await bot.send_message(user_id,coin_report)
+            count_if_coin = 0
+            if index == 4:
+                count_if_coin += 1
+                keyboard_next_page_coin = [
+                    [
+                        # nrn = next Ad receiver page number
+                        Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),
+                                      data=str.encode('nrn:' + str(count_if_coin)))
+                    ]
+                ]
+                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),
+                                       buttons=keyboard_next_page_coin)
+                break
+            else:
+                pass
+@bot.on(events.CallbackQuery(pattern='nrn:*'))
+async def nrn_handler(event):
+    user_id = event.original_update.user_id
+    nrn_number = int(event.data.decode().split(':')[1])+1
+    skip_number = (nrn_number * 5)-5
+    try:
+        keyboard_next_page = [
+            [
+                # nrn = next Ad receiver page number
+                Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),
+                              data=str.encode('nrn:' + str(nrn_number)))
+            ]
+        ]
+
+        find = db.coins.find({'user': user_id,'reason':msg.read_msg('reason_Show_ad')}).sort('change_date', -1).skip(skip_number).limit(5)
+        if find is None:
+            await bot.send_message(user_id, msg.read_msg('coin_not_changed'))
+        else:
+            pass
+        count = 0
+        for coin in find:
+            count +=1
+            coin_change = coin.get('coin_change')
+            reason = coin.get('reason')
+            coin_date = coin.get('change_date')
+            coin_report = f'{msg.read_msg("coin_change")}:{coin_change}\n{msg.read_msg("reason_coin")}:{reason}\n{msg.read_msg("coin_date")}:{coin_date}'
+            await bot.send_message(user_id,coin_report)
+            if count == 5:
+                count = 0
+
+                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),
+                                       buttons=keyboard_next_page)
+            else:
+                pass
+    except Exception() as error:
+        print('error',error)
+
 @bot.on(events.CallbackQuery(pattern='nan:*'))
 async def nan_handler(event):
     user_id = event.original_update.user_id
