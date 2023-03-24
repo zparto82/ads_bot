@@ -9,6 +9,8 @@ from pymongo import MongoClient
 from telethon.sync import TelegramClient, events
 from telethon import Button
 from telethon.tl.functions.channels import GetFullChannelRequest
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackQueryHandler
 api_id = 86576
 api_hash = '385886b58b21b7f3762e1cde2d651925'
 bot_token = config.read("telegram", "bot_token")
@@ -174,7 +176,7 @@ async def handler(event):
                 Button.inline(str(msg.read_msg('help')), b'help_in_Advertiser_menu')
             ],
             [
-                Button.inline(str(msg.read_msg('back')), b'back_in_Advertiser_menu')
+                Button.inline(str(msg.read_msg('back')), b'back')
             ]
 
         ]
@@ -196,7 +198,7 @@ async def handler(event):
                 Button.inline(str(msg.read_msg('help')), b'help_in_Ad_receiver_menu')
             ],
             [
-                Button.inline(str(msg.read_msg('back')), b'back_in_Ad_receiver_menu')
+                Button.inline(str(msg.read_msg('back')), b'back')
             ],
 
         ]
@@ -213,7 +215,7 @@ async def handler(event):
                 Button.inline(str(msg.read_msg('help')), b'help_in_coin_management')
             ],
             [
-                Button.inline(str(msg.read_msg('back')), b'back_in_coin_management')
+                Button.inline(str(msg.read_msg('back')), b'back')
             ],
 
         ]
@@ -262,7 +264,9 @@ async def handler(event):
                     keyboard_next_page = [
                         [
                             # nxn = next button number
-                            Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')), data=str.encode('nxn:' + str(count_if)))
+                            Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')), data=str.encode('nxn:' + str(count_if))),
+                            Button.inline(str(msg.read_msg('back')), b'back'),
+
                         ]
                     ]
                     await bot.send_message(user_id,msg.read_msg('next_page_in_Advertiser_menu'),buttons=keyboard_next_page)
@@ -278,7 +282,8 @@ async def handler(event):
                             [
                                 Button.inline(msg.read_msg("release_new"), data=str.encode('ad:' + ads_id)),
                                 Button.inline(msg.read_msg("edit"), data=b'edit'),
-                                Button.inline(msg.read_msg("delete"), data=b'delete')
+                                Button.inline(msg.read_msg("delete"), data=b'delete'),
+                                Button.inline(str(msg.read_msg('back')), b'back')
                             ]
                         ]
 
@@ -302,7 +307,8 @@ async def handler(event):
                                     Button.inline(msg.read_msg("release_finish_show"), data=str.encode('ad:' + ads_id)),
                                     Button.inline(msg.read_msg("edit"), data=b'edit'),
                                     Button.inline(msg.read_msg("delete"), data=b'delete'),
-                                    Button.inline(msg.read_msg("reports"), data=b'reports')
+                                    Button.inline(msg.read_msg("reports"), data=b'reports'),
+                                    Button.inline(str(msg.read_msg('back')), b'back')
                                 ],
                             ]
 
@@ -323,6 +329,7 @@ async def handler(event):
                                     Button.inline(msg.read_msg("edit"), data=b'edit'),
                                     Button.inline(msg.read_msg("Stop_the_show"), data=b'stop_show'),
                                     Button.inline(msg.read_msg("reports"), data=b'reports'),
+                                    Button.inline(str(msg.read_msg('back')), b'back')
                                 ]
                             ]
 
@@ -370,7 +377,8 @@ async def handler(event):
                     keyboard_next_page = [
                         [
                             # ncn = next channel number
-                            Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')), data=str.encode('ncn:' + str(count_for)))
+                            Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')), data=str.encode('ncn:' + str(count_for))),
+                            Button.inline(str(msg.read_msg('back')), b'back')
                         ]
                     ]
                     await bot.send_message(user_id,msg.read_msg('next_page_in_Advertiser_menu'),buttons=keyboard_next_page)
@@ -402,12 +410,11 @@ async def handler(event):
                 keyboard_next_page_coin = [
                     [
                         # nsn = next score number
-                        Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),
-                                      data=str.encode('nsn:' + str(count_if_coin)))
+                        Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),data=str.encode('nsn:' + str(count_if_coin))),
+                        Button.inline(str(msg.read_msg('back')), b'back')
                     ]
                 ]
-                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),
-                                       buttons=keyboard_next_page_coin)
+                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),buttons=keyboard_next_page_coin)
                 break
             else:
                 pass
@@ -433,12 +440,11 @@ async def handler(event):
                 keyboard_next_page_coin = [
                     [
                         # nan = next Advertising order number
-                        Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),
-                                      data=str.encode('nan:' + str(count_if_coin)))
+                        Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),data=str.encode('nan:' + str(count_if_coin))),
+                        Button.inline(str(msg.read_msg('back')), b'back')
                     ]
                 ]
-                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),
-                                       buttons=keyboard_next_page_coin)
+                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),buttons=keyboard_next_page_coin)
                 break
             else:
                 pass
@@ -464,15 +470,32 @@ async def handler(event):
                 keyboard_next_page_coin = [
                     [
                         # nrn = next Ad receiver page number
-                        Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),
-                                      data=str.encode('nrn:' + str(count_if_coin)))
+                        Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),data=str.encode('nrn:' + str(count_if_coin))),
+                        Button.inline(str(msg.read_msg('back')), b'back')
                     ]
                 ]
-                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),
-                                       buttons=keyboard_next_page_coin)
+                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),buttons=keyboard_next_page_coin)
                 break
             else:
                 pass
+@bot.on(events.CallbackQuery(pattern=b'back'))
+async def start_back(event):
+    user_id = event.original_update.user_id
+    keyboard2 = [
+        [
+            Button.inline(str(msg.read_msg('Advertiser_menu')), b'Advertiser_menu')
+        ],
+        [
+            Button.inline(str(msg.read_msg('Ad_receiver_menu')), b'Ad_receiver_menu')
+        ],
+        [
+            Button.inline(str(msg.read_msg('coin_management')), b'coin_management')
+        ],
+        [
+            Button.inline(str(msg.read_msg('help')), b'help_in_home')
+        ],
+    ]
+    await bot.send_message(user_id, msg.read_msg('Introduction'), buttons=keyboard2)
 @bot.on(events.CallbackQuery(pattern='nrn:*'))
 async def nrn_handler(event):
     user_id = event.original_update.user_id
@@ -482,8 +505,8 @@ async def nrn_handler(event):
         keyboard_next_page = [
             [
                 # nrn = next Ad receiver page number
-                Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),
-                              data=str.encode('nrn:' + str(nrn_number)))
+                Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),data=str.encode('nrn:' + str(nrn_number))),
+                Button.inline(str(msg.read_msg('back')), b'back')
             ]
         ]
 
@@ -503,8 +526,7 @@ async def nrn_handler(event):
             if count == 5:
                 count = 0
 
-                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),
-                                       buttons=keyboard_next_page)
+                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),buttons=keyboard_next_page)
             else:
                 pass
     except Exception() as error:
@@ -519,8 +541,8 @@ async def nan_handler(event):
         keyboard_next_page = [
             [
                 # nan = next score number
-                Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),
-                              data=str.encode('nan:' + str(nan_number)))
+                Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),data=str.encode('nan:' + str(nan_number))),
+                Button.inline(str(msg.read_msg('back')), b'back')
             ]
         ]
 
@@ -540,8 +562,7 @@ async def nan_handler(event):
             if count == 5:
                 count = 0
 
-                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),
-                                       buttons=keyboard_next_page)
+                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),buttons=keyboard_next_page)
             else:
                 pass
     except Exception() as error:
@@ -556,8 +577,8 @@ async def nsn_handler(event):
         keyboard_next_page = [
             [
                 # nsn = next score number
-                Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),
-                              data=str.encode('nsn:' + str(nsn_number)))
+                Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),data=str.encode('nsn:' + str(nsn_number))),
+                Button.inline(str(msg.read_msg('back')), b'back')
             ]
         ]
 
@@ -577,8 +598,7 @@ async def nsn_handler(event):
             if count == 5:
                 count = 0
 
-                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),
-                                       buttons=keyboard_next_page)
+                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),buttons=keyboard_next_page)
             else:
                 pass
     except Exception() as error:
@@ -594,8 +614,8 @@ async def ncn_handler(event):
         keyboard_next_page = [
             [
                 # ncn = next channel number
-                Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),
-                              data=str.encode('ncn:' + str(ncn_number)))
+                Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')),data=str.encode('ncn:' + str(ncn_number))),
+                Button.inline(str(msg.read_msg('back')), b'back')
             ]
         ]
         await bot.send_message(user_id, msg.read_msg('welcome_show_channel'))
@@ -619,8 +639,7 @@ async def ncn_handler(event):
             if count == 5:
                 count = 0
 
-                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),
-                                       buttons=keyboard_next_page)
+                await bot.send_message(user_id, msg.read_msg('next_page_in_Advertiser_menu'),buttons=keyboard_next_page)
             else:
                 pass
     except Exception() as error:
@@ -636,7 +655,8 @@ async def nxn_handler(event):
     keyboard_next_page = [
         [
             # nxn = next button number
-            Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')), data=str.encode('nxn:' + str(nxn_number)))
+            Button.inline(str(msg.read_msg('next_page_in_Advertiser_menu')), data=str.encode('nxn:' + str(nxn_number))),
+            Button.inline(str(msg.read_msg('back')), b'back')
         ]
     ]
     count_for = 0
@@ -651,7 +671,8 @@ async def nxn_handler(event):
                     [
                         Button.inline(msg.read_msg("release_new"), data=str.encode('ad:' + ads_id)),
                         Button.inline(msg.read_msg("edit"), data=b'edit'),
-                        Button.inline(msg.read_msg("delete"), data=b'delete')
+                        Button.inline(msg.read_msg("delete"), data=b'delete'),
+                        Button.inline(str(msg.read_msg('back')), b'back')
                     ]
                 ]
 
@@ -674,7 +695,8 @@ async def nxn_handler(event):
                             Button.inline(msg.read_msg("release_finish_show"), data=str.encode('ad:' + ads_id)),
                             Button.inline(msg.read_msg("edit"), data=b'edit'),
                             Button.inline(msg.read_msg("delete"), data=b'delete'),
-                            Button.inline(msg.read_msg("reports"), data=b'reports')
+                            Button.inline(msg.read_msg("reports"), data=b'reports'),
+                            Button.inline(str(msg.read_msg('back')), b'back')
                         ],
                     ]
 
@@ -695,6 +717,7 @@ async def nxn_handler(event):
                             Button.inline(msg.read_msg("edit"), data=b'edit'),
                             Button.inline(msg.read_msg("Stop_the_show"), data=b'stop_show'),
                             Button.inline(msg.read_msg("reports"), data=b'reports'),
+                            Button.inline(str(msg.read_msg('back')), b'back')
                         ]
                     ]
 
