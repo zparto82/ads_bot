@@ -9,19 +9,28 @@ from telethon.sync import TelegramClient
 api_id = 86576
 api_hash = '385886b58b21b7f3762e1cde2d651925'
 bot_token = config.read("telegram", "bot_token")
+mongo_client = MongoClient('127.0.0.1:27017')
+db = mongo_client.user
+# check ad_pending
+ad_pending_find = db.ad_pending.find({'Number_of_coins': {'$gt': 0}}).sort('Number_of_coins', -1).limit(1)
+
+ad_pending_find_list = list(ad_pending_find)
+if len(ad_pending_find_list) == 0:
+    exit()
+else:
+    pass
 if config.read('telegram', 'proxy') == 'True':
     client = TelegramClient('bot_background', api_id, api_hash, proxy=('socks5', '127.0.0.1', 1082))
 else:
     client = TelegramClient('bot_background', api_id, api_hash)
 client.start(bot_token=bot_token)
-mongo_client = MongoClient('127.0.0.1:27017')
-db = mongo_client.user
+
 
 date_time = datetime.datetime.now()
-# check ad_pending
-ad_pending_find = db.ad_pending.find({'Number_of_coins': {'$gt': 0}}).sort('Number_of_coins', -1).limit(1)
+
+
 ad_id, number_of_coin, real_id = None, 0, 0
-for ad in ad_pending_find:
+for ad in ad_pending_find_list:
     ad_id = ad.get('ad_id')
     number_of_coin = ad.get('Number_of_coins')
     real_id = ad.get('_id')
