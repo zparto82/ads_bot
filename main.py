@@ -21,6 +21,8 @@ bot.start(bot_token=bot_token)
 mongo_client = MongoClient('127.0.0.1:27017')
 db = mongo_client.user
 
+
+
 @bot.on(events.NewMessage(pattern="/start"))
 async def start(event):
     user_id = event.message.peer_id.user_id
