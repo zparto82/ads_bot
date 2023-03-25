@@ -83,6 +83,33 @@ msgstr '< صفحه بعد'
 msgid "buy_coins"
 msgstr "💵خرید سکه💵"
 
+msgid 'edit_text'
+msgstr 'متن جدید را وارد کنید:'
+
+msgid 'new_tx_successfully'
+msgstr 'متن جدید با موفقیت ثبت شد✅'
+
+msgid 'new_link_successfully'
+msgstr 'لینک جدید با موفقیت ثبت شد✅'
+
+msgid 'text_and_link_successfully'
+msgstr 'تبلیغ با موفقیت ویرایش شد✅'
+
+msgid 'edit_link'
+msgstr 'لینک جدید را واردکنید:'
+
+msgid 'text_or_link'
+msgstr 'متن را ویرایش میکنید یا لینک؟'
+
+msgid 'link'
+msgstr 'لینک'
+
+msgid 'text'
+msgstr 'متن'
+
+msgid 'text_and_link'
+msgstr 'هردو'
+
 msgid 'help'
 msgstr '⁉راهنما⁉'
 

@@ -1,3 +1,4 @@
+import struct
 
 import coins
 import config
@@ -282,7 +283,7 @@ async def handler(event):
                         keyboard_new = [
                             [
                                 Button.inline(msg.read_msg("release_new"), data=str.encode('ad:' + ads_id)),
-                                Button.inline(msg.read_msg("edit"), data=b'edit'),
+                                Button.inline(msg.read_msg("edit"), data=str.encode('edit:'+ ads_id)),
                                 Button.inline(msg.read_msg("delete"), data=b'delete'),
                                 Button.inline(str(msg.read_msg('back')), b'back')
                             ]
@@ -306,7 +307,7 @@ async def handler(event):
                             keyboard_finish = [
                                 [
                                     Button.inline(msg.read_msg("release_finish_show"), data=str.encode('ad:' + ads_id)),
-                                    Button.inline(msg.read_msg("edit"), data=b'edit'),
+                                    Button.inline(msg.read_msg("edit"), data=str.encode('edit:'+ ads_id)),
                                     Button.inline(msg.read_msg("delete"), data=b'delete'),
                                     Button.inline(msg.read_msg("reports"), data=b'reports'),
                                     Button.inline(str(msg.read_msg('back')), b'back')
@@ -327,7 +328,7 @@ async def handler(event):
                             keyboard_show = [
                                 [
                                     Button.inline(msg.read_msg("add_coin"), data=str.encode('ad:' + ads_id)),
-                                    Button.inline(msg.read_msg("edit"), data=b'edit'),
+                                    Button.inline(msg.read_msg("edit"), data=str.encode('edit:'+ ads_id)),
                                     Button.inline(msg.read_msg("Stop_the_show"), data=b'stop_show'),
                                     Button.inline(msg.read_msg("reports"), data=b'reports'),
                                     Button.inline(str(msg.read_msg('back')), b'back')
@@ -479,6 +480,38 @@ async def handler(event):
                 break
             else:
                 pass
+    elif event.data == b'text':
+        async with bot.conversation(user_id, timeout=1000) as conv:
+            msg1 = await conv.send_message(msg.read_msg('edit_text'))
+            quantity = await conv.get_response(timeout=1000)
+            new_ad_text = quantity.message
+            record = db.ads.find_one({'_id':ad_id_edit})
+            update = db.ads.update_one(record, {'$set': {'text': new_ad_text}})
+            await bot.send_message(user_id,msg.read_msg('new_tx_successfully'))
+    elif event.data == b'link':
+        async with bot.conversation(user_id, timeout=1000) as conv:
+            msg1 = await conv.send_message(msg.read_msg('edit_link'))
+            quantity = await conv.get_response(timeout=1000)
+            new_ad_link = quantity.message
+            record = db.ads.find_one({'_id':ad_id_edit})
+            update = db.ads.update_one(record, {'$set': {'link': new_ad_link}})
+            await bot.send_message(user_id,msg.read_msg('new_link_successfully'))
+
+    elif event.data == b'edit_text_and_link':
+        async with bot.conversation(user_id, timeout=1000) as conv:
+            msg1 = await conv.send_message(msg.read_msg('edit_text'))
+            quantity = await conv.get_response(timeout=1000)
+            new_ad_text = quantity.message
+            record = db.ads.find_one({'_id':ad_id_edit})
+            update = db.ads.update_one(record, {'$set': {'text': new_ad_text}})
+            await bot.send_message(user_id,msg.read_msg('new_tx_successfully'))
+        async with bot.conversation(user_id, timeout=1000) as conv:
+            msg1 = await conv.send_message(msg.read_msg('edit_link'))
+            quantity = await conv.get_response(timeout=1000)
+            new_ad_link = quantity.message
+            record = db.ads.find_one({'_id':ad_id_edit})
+            update = db.ads.update_one(record, {'$set': {'link': new_ad_link}})
+            await bot.send_message(user_id,msg.read_msg('new_link_successfully'))
 @bot.on(events.CallbackQuery(pattern=b'back'))
 async def start_back(event):
     user_id = event.original_update.user_id
@@ -497,6 +530,38 @@ async def start_back(event):
         ],
     ]
     await bot.send_message(user_id, msg.read_msg('Introduction'), buttons=keyboard2)
+
+@bot.on(events.CallbackQuery(pattern='edit:*'))
+async def edit_handler(event):
+    global ad_id_edit
+    ad_id_edit = event.data.decode().split(':')[1]
+
+    user_id = event.original_update.user_id
+    keys = [
+        [
+            Button.inline(str(msg.read_msg('text')), b'text')
+        ],
+        [
+            Button.inline(str(msg.read_msg('link')), b'link')
+        ],
+        [
+            Button.inline(str(msg.read_msg('text_and_link')), b'edit_text_and_link')
+        ],
+        [
+            Button.inline(str(msg.read_msg('back')), b'back')
+        ]
+    ]
+    await bot.send_message(user_id,msg.read_msg('text_or_link'),buttons=keys)
+
+    # async with bot.conversation(user_id, timeout=1000) as conv:
+    #     msg1 = await conv.send_message(msg.read_msg('how many coins'))
+    #     quantity = await conv.get_response(timeout=1000)
+    #     try:
+    #         pending_coin = int(quantity.message)
+    #         is_coin_number = True
+    #     except:
+    #         await bot.send_message(user_id,msg.read_msg('waring_number'))
+
 @bot.on(events.CallbackQuery(pattern='nrn:*'))
 async def nrn_handler(event):
     user_id = event.original_update.user_id
@@ -671,7 +736,7 @@ async def nxn_handler(event):
                 keyboard_new = [
                     [
                         Button.inline(msg.read_msg("release_new"), data=str.encode('ad:' + ads_id)),
-                        Button.inline(msg.read_msg("edit"), data=b'edit'),
+                        Button.inline(msg.read_msg("edit"), data=str.encode('edit:'+ ads_id)),
                         Button.inline(msg.read_msg("delete"), data=b'delete'),
                         Button.inline(str(msg.read_msg('back')), b'back')
                     ]
@@ -694,7 +759,7 @@ async def nxn_handler(event):
                     keyboard_finish = [
                         [
                             Button.inline(msg.read_msg("release_finish_show"), data=str.encode('ad:' + ads_id)),
-                            Button.inline(msg.read_msg("edit"), data=b'edit'),
+                            Button.inline(msg.read_msg("edit"), data=str.encode('edit:'+ ads_id)),
                             Button.inline(msg.read_msg("delete"), data=b'delete'),
                             Button.inline(msg.read_msg("reports"), data=b'reports'),
                             Button.inline(str(msg.read_msg('back')), b'back')
@@ -715,7 +780,7 @@ async def nxn_handler(event):
                     keyboard_show = [
                         [
                             Button.inline(msg.read_msg("add_coin"), data=str.encode('ad:' + ads_id)),
-                            Button.inline(msg.read_msg("edit"), data=b'edit'),
+                            Button.inline(msg.read_msg("edit"), data=str.encode('edit:'+ ads_id)),
                             Button.inline(msg.read_msg("Stop_the_show"), data=b'stop_show'),
                             Button.inline(msg.read_msg("reports"), data=b'reports'),
                             Button.inline(str(msg.read_msg('back')), b'back')
