@@ -284,7 +284,7 @@ async def handler(event):
                             [
                                 Button.inline(msg.read_msg("release_new"), data=str.encode('ad:' + ads_id)),
                                 Button.inline(msg.read_msg("edit"), data=str.encode('edit:'+ ads_id)),
-                                Button.inline(msg.read_msg("delete"), data=b'delete'),
+                                Button.inline(msg.read_msg("delete"), data=str.encode('del:'+ ads_id)),
                                 Button.inline(str(msg.read_msg('back')), b'back')
                             ]
                         ]
@@ -308,7 +308,7 @@ async def handler(event):
                                 [
                                     Button.inline(msg.read_msg("release_finish_show"), data=str.encode('ad:' + ads_id)),
                                     Button.inline(msg.read_msg("edit"), data=str.encode('edit:'+ ads_id)),
-                                    Button.inline(msg.read_msg("delete"), data=b'delete'),
+                                    Button.inline(msg.read_msg("delete"), data=str.encode('del:'+ ads_id)),
                                     Button.inline(msg.read_msg("reports"), data=b'reports'),
                                     Button.inline(str(msg.read_msg('back')), b'back')
                                 ],
@@ -487,7 +487,10 @@ async def handler(event):
             new_ad_text = quantity.message
             record = db.ads.find_one({'_id':ad_id_edit})
             update = db.ads.update_one(record, {'$set': {'text': new_ad_text}})
-            await bot.send_message(user_id,msg.read_msg('new_tx_successfully'))
+            keys = [[
+                Button.inline(str(msg.read_msg('back')), b'back'),
+            ]]
+            await bot.send_message(user_id,msg.read_msg('new_tx_successfully'),buttons=keys)
     elif event.data == b'link':
         async with bot.conversation(user_id, timeout=1000) as conv:
             msg1 = await conv.send_message(msg.read_msg('edit_link'))
@@ -495,7 +498,10 @@ async def handler(event):
             new_ad_link = quantity.message
             record = db.ads.find_one({'_id':ad_id_edit})
             update = db.ads.update_one(record, {'$set': {'link': new_ad_link}})
-            await bot.send_message(user_id,msg.read_msg('new_link_successfully'))
+            keys = [[
+                Button.inline(str(msg.read_msg('back')), b'back'),
+            ]]
+            await bot.send_message(user_id,msg.read_msg('new_link_successfully'),buttons=keys)
 
     elif event.data == b'edit_text_and_link':
         async with bot.conversation(user_id, timeout=1000) as conv:
@@ -504,14 +510,31 @@ async def handler(event):
             new_ad_text = quantity.message
             record = db.ads.find_one({'_id':ad_id_edit})
             update = db.ads.update_one(record, {'$set': {'text': new_ad_text}})
-            await bot.send_message(user_id,msg.read_msg('new_tx_successfully'))
+            keys = [[
+                Button.inline(str(msg.read_msg('back')), b'back'),
+            ]]
+            await bot.send_message(user_id,msg.read_msg('new_tx_successfully'),buttons=keys)
         async with bot.conversation(user_id, timeout=1000) as conv:
             msg1 = await conv.send_message(msg.read_msg('edit_link'))
             quantity = await conv.get_response(timeout=1000)
             new_ad_link = quantity.message
             record = db.ads.find_one({'_id':ad_id_edit})
             update = db.ads.update_one(record, {'$set': {'link': new_ad_link}})
-            await bot.send_message(user_id,msg.read_msg('new_link_successfully'))
+            keys = [[
+                Button.inline(str(msg.read_msg('back')), b'back'),
+            ]]
+            await bot.send_message(user_id,msg.read_msg('new_link_successfully'),buttons=keys)
+@bot.on(events.CallbackQuery(pattern='del:*'))
+async def del_handler(event):
+    global ad_id_del
+    ad_id_del = event.data.decode().split(':')[1]
+    user_id = event.original_update.user_id
+    find_del = db.ad_pending.find_one({'ad_id':ad_id_del,'Number_of_coins': {'$gt': 0}})
+    if find_del is not None:
+        await bot.send_message(user_id,msg.read_msg("can't_del"))
+    else:
+        delete = db.ads.delete_one({"_id":ad_id_del})
+        await bot.send_message(user_id,msg.read_msg('del_successfully'))
 @bot.on(events.CallbackQuery(pattern=b'back'))
 async def start_back(event):
     user_id = event.original_update.user_id
@@ -553,14 +576,6 @@ async def edit_handler(event):
     ]
     await bot.send_message(user_id,msg.read_msg('text_or_link'),buttons=keys)
 
-    # async with bot.conversation(user_id, timeout=1000) as conv:
-    #     msg1 = await conv.send_message(msg.read_msg('how many coins'))
-    #     quantity = await conv.get_response(timeout=1000)
-    #     try:
-    #         pending_coin = int(quantity.message)
-    #         is_coin_number = True
-    #     except:
-    #         await bot.send_message(user_id,msg.read_msg('waring_number'))
 
 @bot.on(events.CallbackQuery(pattern='nrn:*'))
 async def nrn_handler(event):
@@ -737,7 +752,7 @@ async def nxn_handler(event):
                     [
                         Button.inline(msg.read_msg("release_new"), data=str.encode('ad:' + ads_id)),
                         Button.inline(msg.read_msg("edit"), data=str.encode('edit:'+ ads_id)),
-                        Button.inline(msg.read_msg("delete"), data=b'delete'),
+                        Button.inline(msg.read_msg("delete"), data=str.encode('del:'+ ads_id)),
                         Button.inline(str(msg.read_msg('back')), b'back')
                     ]
                 ]
@@ -760,7 +775,7 @@ async def nxn_handler(event):
                         [
                             Button.inline(msg.read_msg("release_finish_show"), data=str.encode('ad:' + ads_id)),
                             Button.inline(msg.read_msg("edit"), data=str.encode('edit:'+ ads_id)),
-                            Button.inline(msg.read_msg("delete"), data=b'delete'),
+                            Button.inline(msg.read_msg("delete"), data=str.encode('del:' + ads_id)),
                             Button.inline(msg.read_msg("reports"), data=b'reports'),
                             Button.inline(str(msg.read_msg('back')), b'back')
                         ],

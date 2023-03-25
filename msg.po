@@ -89,6 +89,12 @@ msgstr 'متن جدید را وارد کنید:'
 msgid 'new_tx_successfully'
 msgstr 'متن جدید با موفقیت ثبت شد✅'
 
+msgid "can't_del"
+msgstr 'این تبلیغ در حال نمایش است و شما نمی توانید آن را حذف کنید❗ابتدا تبلیغ را متوقف کنید❗'
+
+msgid 'del_successfully'
+msgstr 'تبلیغ با موفقیت حذف شد❌'
+
 msgid 'new_link_successfully'
 msgstr 'لینک جدید با موفقیت ثبت شد✅'
 

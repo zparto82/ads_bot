@@ -16,6 +16,7 @@ ad_pending_find = db.ad_pending.find({'Number_of_coins': {'$gt': 0}}).sort('Numb
 
 ad_pending_find_list = list(ad_pending_find)
 if len(ad_pending_find_list) == 0:
+    print('s')
     exit()
 else:
     pass
@@ -32,6 +33,7 @@ date_time = datetime.datetime.now()
 ad_id, number_of_coin, real_id = None, 0, 0
 for ad in ad_pending_find_list:
     ad_id = ad.get('ad_id')
+    print(ad_id)
     number_of_coin = ad.get('Number_of_coins')
     real_id = ad.get('_id')
 # get ad
