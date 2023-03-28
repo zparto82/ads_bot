@@ -118,6 +118,13 @@ async def ad_handler(event):
     post_id = event.original_update.msg_id
     ad_id = event.data.decode().split(':')[1]
     user_id = event.original_update.user_id
+    find_ad = db.ad_pending.find_one({'ad_id':ad_id})
+    if find_ad is None:
+        pass
+    else:
+        await bot.send_message(user_id,msg.read_msg("can't_release_new"))
+        return
+
     async with bot.conversation(user_id, timeout=1000) as conv:
         is_coin_number = False
         while not is_coin_number:
@@ -148,7 +155,10 @@ async def ad_handler(event):
                     'Number_of_coins' : pending_coin,
                     'ad_id' : ad_id,
                 })
-                await bot.send_message(user_id,msg.read_msg('The_coin_was_spent_successfully'))
+                keys = [[
+                    Button.inline(str(msg.read_msg('back')), b'back')
+                ]]
+                await bot.send_message(user_id,msg.read_msg('The_coin_was_spent_successfully'),buttons=keys)
             except:
                 pass
 
@@ -159,7 +169,7 @@ async def ad_handler(event):
 async def handler(event):
 
     user_id = event.original_update.user_id
-
+    print(event.data)
     find = db.users.find_one({'_id': event.original_update.user_id})
     code_2 = find.get('code')
 
@@ -246,7 +256,10 @@ async def handler(event):
                     "owner_id" : user_id,
                     'date': str(date),
                 })
-                await bot.send_message(user_id,msg.read_msg('The_ad_was_created_successfully'))
+                key = [[
+                    Button.inline(str(msg.read_msg('back')), b'back')
+                ]]
+                await bot.send_message(user_id,msg.read_msg('The_ad_was_created_successfully'),buttons=key)
             except:
                 pass
     elif event.data == b'show_ad_in_Advertiser_menu':
@@ -306,7 +319,7 @@ async def handler(event):
                             status_finish = 'Finish_the_show'
                             keyboard_finish = [
                                 [
-                                    Button.inline(msg.read_msg("release_finish_show"), data=str.encode('ad:' + ads_id)),
+                                    Button.inline(msg.read_msg("release_finish_show"), data=str.encode('ad_finish:' + ads_id)),
                                     Button.inline(msg.read_msg("edit"), data=str.encode('edit:'+ ads_id)),
                                     Button.inline(msg.read_msg("delete"), data=str.encode('del:'+ ads_id)),
                                     Button.inline(msg.read_msg("reports"), data=b'reports'),
@@ -327,7 +340,7 @@ async def handler(event):
 
                             keyboard_show = [
                                 [
-                                    Button.inline(msg.read_msg("add_coin"), data=str.encode('ad:' + ads_id)),
+                                    Button.inline(msg.read_msg("add_coin"), data=str.encode('add_coin:' + ads_id)),
                                     Button.inline(msg.read_msg("edit"), data=str.encode('edit:'+ ads_id)),
                                     Button.inline(msg.read_msg("Stop_the_show"), data=b'stop_show'),
                                     Button.inline(msg.read_msg("reports"), data=b'reports'),
@@ -524,6 +537,60 @@ async def handler(event):
                 Button.inline(str(msg.read_msg('back')), b'back'),
             ]]
             await bot.send_message(user_id,msg.read_msg('new_link_successfully'),buttons=keys)
+
+@bot.on(events.CallbackQuery(pattern='add_coin:*'))
+async def add_coin_handler(event):
+    post_id = event.original_update.msg_id
+    ad_id_coin = event.data.decode().split(':')[1]
+    print('ad_id_coin',ad_id_coin)
+    user_id = event.original_update.user_id
+    find_ad = db.ad_pending.find_one({'ad_id':ad_id_coin,'Number_of_coins': {'$gt': 0}})
+    if find_ad is None:
+        await bot.send_message(user_id,msg.read_msg("can't_add_coin"))
+        return
+    else:
+        pass
+    async with bot.conversation(user_id, timeout=1000) as conv:
+        is_coin_number = False
+        while not is_coin_number:
+            msg1 = await conv.send_message(msg.read_msg('how many coins'))
+            quantity = await conv.get_response(timeout=1000)
+            try:
+                pending_coin = int(quantity.message)
+                is_coin_number = True
+            except:
+                await bot.send_message(user_id,msg.read_msg('waring_number'))
+        # check if user has enough coin
+        find = db.users.find_one({'_id':user_id})
+        coin = find.get('coin')
+        if coin < pending_coin or pending_coin <= 0:
+            await bot.send_message(user_id,msg.read_msg("don't_have_enough_coins"))
+        else:
+            # deduct coins from user's balance
+            new_coin = coin-pending_coin
+            update = db.users.update_one({'_id':user_id},{'$set':{'coin':new_coin}})
+
+            # log coin change
+            change_date = datetime.datetime.now()
+            log_coin_change = coins.coin(user_id,-pending_coin,msg.read_msg('reason_Advertising_order'),change_date,db)
+
+            # insert into ad_pending
+            try:
+                find_real = db.ad_pending.find_one({'ad_id': ad_id_coin,'Number_of_coins': {'$gt': 0}})
+                real_id = find_real.get('_id')
+                find_update = db.ad_pending.find_one({'_id':real_id})
+                Number_of_coin = find_update.get('Number_of_coins')
+                print('Number_of_coin',Number_of_coin)
+                Num = Number_of_coin + pending_coin
+                print('Num',Num)
+                update_ad_coin = db.ad_pending.update_one(find_update,{'$set':{'Number_of_coins':Num}})
+                print(update_ad_coin)
+                await bot.send_message(user_id,msg.read_msg('add_coin_successfully'))
+                return
+            except Exception as er:
+                print(er)
+
+
 @bot.on(events.CallbackQuery(pattern='del:*'))
 async def del_handler(event):
     global ad_id_del
@@ -535,6 +602,52 @@ async def del_handler(event):
     else:
         delete = db.ads.delete_one({"_id":ad_id_del})
         await bot.send_message(user_id,msg.read_msg('del_successfully'))
+@bot.on(events.CallbackQuery(pattern='ad_finish:*'))
+async def ad_finish_handler(event):
+    post_id = event.original_update.msg_id
+    ad_id_finish = event.data.decode().split(':')[1]
+    print('ad_finish:',ad_id_finish)
+    user_id = event.original_update.user_id
+    find_ad = db.ad_pending.find_one({'ad_id':ad_id_finish,'Number_of_coins': {'$gt': 0}})
+    if find_ad is not None:
+        await bot.send_message(user_id,msg.read_msg("can't_release_finish"))
+        return
+    else:
+        pass
+    async with bot.conversation(user_id, timeout=1000) as conv:
+        is_coin_number = False
+        while not is_coin_number:
+            msg1 = await conv.send_message(msg.read_msg('how many coins'))
+            quantity = await conv.get_response(timeout=1000)
+            try:
+                pending_coin = int(quantity.message)
+                is_coin_number = True
+            except:
+                await bot.send_message(user_id,msg.read_msg('waring_number'))
+        # check if user has enough coin
+        find = db.users.find_one({'_id':user_id})
+        coin = find.get('coin')
+        if coin < pending_coin or pending_coin <= 0:
+            await bot.send_message(user_id,msg.read_msg("don't_have_enough_coins"))
+        else:
+            # deduct coins from user's balance
+            new_coin = coin-pending_coin
+            update = db.users.update_one({'_id':user_id},{'$set':{'coin':new_coin}})
+
+            # log coin change
+            change_date = datetime.datetime.now()
+            log_coin_change = coins.coin(user_id,-pending_coin,msg.read_msg('reason_Advertising_order'),change_date,db)
+
+            # insert into ad_pending
+            try:
+                insert = db.ad_pending.insert_one({
+                    'Number_of_coins' : pending_coin,
+                    'ad_id' : ad_id_finish,
+                })
+                await bot.send_message(user_id,msg.read_msg('The_coin_was_spent_successfully'))
+                return
+            except:
+                pass
 @bot.on(events.CallbackQuery(pattern=b'back'))
 async def start_back(event):
     user_id = event.original_update.user_id
@@ -773,7 +886,7 @@ async def nxn_handler(event):
                     status_finish = 'Finish_the_show'
                     keyboard_finish = [
                         [
-                            Button.inline(msg.read_msg("release_finish_show"), data=str.encode('ad:' + ads_id)),
+                            Button.inline(msg.read_msg("release_finish_show"), data=str.encode('ad_finish:' + ads_id)),
                             Button.inline(msg.read_msg("edit"), data=str.encode('edit:'+ ads_id)),
                             Button.inline(msg.read_msg("delete"), data=str.encode('del:' + ads_id)),
                             Button.inline(msg.read_msg("reports"), data=b'reports'),
@@ -794,7 +907,7 @@ async def nxn_handler(event):
 
                     keyboard_show = [
                         [
-                            Button.inline(msg.read_msg("add_coin"), data=str.encode('ad:' + ads_id)),
+                            Button.inline(msg.read_msg("add_coin"), data=str.encode('add_coin:' + ads_id)),
                             Button.inline(msg.read_msg("edit"), data=str.encode('edit:'+ ads_id)),
                             Button.inline(msg.read_msg("Stop_the_show"), data=b'stop_show'),
                             Button.inline(msg.read_msg("reports"), data=b'reports'),

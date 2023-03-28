@@ -16,7 +16,6 @@ ad_pending_find = db.ad_pending.find({'Number_of_coins': {'$gt': 0}}).sort('Numb
 
 ad_pending_find_list = list(ad_pending_find)
 if len(ad_pending_find_list) == 0:
-    print('s')
     exit()
 else:
     pass
@@ -48,20 +47,20 @@ for index, group in enumerate(find_connections):
     members = group.get('members')
     owner_id = group.get('owner')
     ads_owner = db.ads.find_one({'_id':ad_id})
-    if ads_owner['owner_id'] == owner_id:
-        continue
+    # if ads_owner['owner_id'] == owner_id:
+    #     continue
     if number_of_coin < members:
         continue
-    try:
-        filter_24h = db.ad_connection.find({'connection_id': channel_id}).sort('start_date', -1).limit(1)
-
-        start_date = 0
-        for ad_24h in filter_24h:
-            start_date = ad_24h.get('start_date')
-        if date_time - start_date < datetime.timedelta(days=1):
-            continue
-    except Exception as er:
-        print(er)
+    # try:
+    #     filter_24h = db.ad_connection.find({'connection_id': channel_id}).sort('start_date', -1).limit(1)
+    #
+    #     start_date = 0
+    #     for ad_24h in filter_24h:
+    #         start_date = ad_24h.get('start_date')
+    #     if date_time - start_date < datetime.timedelta(days=1):
+    #         continue
+    # except Exception as er:
+    #     print(er)
     try:
         send_ads_in_back = send_ads.send_ads(text, link, channel_id, client)
         post_id = send_ads_in_back.id
